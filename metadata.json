@@ -1,0 +1,6 @@
+{
+  "name": "Poster AI",
+  "description": "AI-powered e-commerce product poster generation with background removal and Gemini 2.0 Flash.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}

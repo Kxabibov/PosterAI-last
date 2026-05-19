@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and credit information",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User's email address"
+        },
+        "name": {
+          "type": "string",
+          "description": "User's display name"
+        },
+        "credits": {
+          "type": "number",
+          "description": "Available generation credits"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the user joined"
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Whether the user has admin privileges"
+        }
+      },
+      "required": ["email", "credits", "isAdmin"]
+    },
+    "PromptTemplate": {
+      "title": "Prompt Template",
+      "description": "Templates for AI poster generation",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the style"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Emoji or icon representing the style"
+        },
+        "description": {
+          "type": "string",
+          "description": "Short description shown to users"
+        },
+        "promptText": {
+          "type": "string",
+          "description": "Full prompt text for Gemini"
+        }
+      },
+      "required": ["name", "promptText"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/prompts/{promptId}": {
+      "schema": "PromptTemplate",
+      "description": "Prompt template documents"
+    }
+  }
+}
