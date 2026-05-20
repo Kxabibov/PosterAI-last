@@ -315,7 +315,7 @@ export default function App() {
       pricingTitle: "Pricing Plans",
       pricingDesc: "Choose the best plan for your creative needs",
       mostPopular: "Most Popular",
-      contactTelegram: "Contact via Telegram",
+      contactTelegram: "Contact",
       manualPayment: "Payments are processed manually via Telegram. Credits will be added to your account instantly after confirmation.",
       welcomeBack: "Welcome back",
       signInDesc: "Sign in to start creating beautiful product posters",
@@ -425,7 +425,7 @@ export default function App() {
       pricingTitle: "Тарифные планы",
       pricingDesc: "Выберите подходящий тариф для ваших идей",
       mostPopular: "Популярный",
-      contactTelegram: "Связаться в Telegram",
+      contactTelegram: "Связаться",
       manualPayment: "Оплата обрабатывается вручную через Telegram. Кредиты будут зачислены сразу после подтверждения.",
       welcomeBack: "С возвращением",
       signInDesc: "Войдите, чтобы начать создавать красивые постеры",
@@ -527,7 +527,7 @@ export default function App() {
       pricingTitle: "Tariflar",
       pricingDesc: "Ijodiy ehtiyojlaringiz uchun eng yaxshi rejani tanlang",
       mostPopular: "Eng ommabop",
-      contactTelegram: "Telegram orqali bog'lanish",
+      contactTelegram: "Bog'lanish",
       manualPayment: "To'lovlar Telegram orqali qo'lda amalga oshiriladi. Tasdiqlangandan so'ng kreditlar darhol hisobingizga qo'shiladi.",
       welcomeBack: "Xush kelibsiz",
       signInDesc: "Chiroyli mahsulot posterlarini yaratishni boshlash uchun kiring",
@@ -1215,7 +1215,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-16 right-4 z-[200] w-64 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#dde3ea]/80 dark:border-white/10 p-5 flex flex-col gap-4 text-left"
+            className="fixed top-16 right-4 z-[200] w-64 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#dde3ea]/80 dark:border-white/10 p-5 flex flex-col gap-4 text-left"
           >
             <div className="flex items-center justify-between pb-2 border-b border-[#dde3ea]/50 dark:border-white/10">
               <span className="font-['Orbitron'] text-sm font-extrabold tracking-tighter bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">
@@ -1440,7 +1440,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     exit={{ opacity: 0, y: -20 }}
                     className="text-center py-2 md:py-6"
                   >
-                    <h1 className="font-['Orbitron'] text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none">
+                    <h1 className="font-['Orbitron'] text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none min-h-[110px] sm:min-h-[130px] md:min-h-[160px] flex flex-col justify-center items-center">
                       {appLanguage === 'English' ? (
                         <>Product card created<br />before your <TypewriterCycle 
                           phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
@@ -2052,7 +2052,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 ].map((plan, i) => (
                   <motion.div key={i} initial={{ opacity:0, y:30 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay: i * 0.1 }} className={"pricing-card-animated flex flex-col relative overflow-visible" + (plan.popular ? " popular-animated" : "")}>
                     {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1a7aad] to-[#4fc3f7] text-[#0a0d12] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(79,195,247,0.5)] z-20">{t.mostPopular}</div>}
-                    <div className="pricing-card-border-wrap relative overflow-hidden rounded-[32px] w-full h-full flex flex-col flex-1">
+                    <div className="pricing-card-border-wrap relative overflow-hidden w-full h-full flex flex-col flex-1">
                       <div className="pricing-blob" style={{ background: plan.blobColor }}></div>
                       <div className="pricing-inner">
                         <div className="mb-4">
