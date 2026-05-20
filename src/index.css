@@ -1365,3 +1365,44 @@ body {
     margin-bottom: 0.75rem !important;
   }
 }
+
+/* Custom PIXO Loader Animation */
+.loader-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+.loader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dash {
+  animation: dashArray 4s ease-in-out infinite, dashOffset 4s linear infinite;
+}
+.spin {
+  animation: spinDashArray 4s ease-in-out infinite, spin 16s ease-in-out infinite, dashOffset 4s linear infinite;
+  transform-origin: center;
+}
+@keyframes dashArray {
+  0%   { stroke-dasharray: 0 1 359 0; }
+  50%  { stroke-dasharray: 0 359 1 0; }
+  100% { stroke-dasharray: 359 1 0 0; }
+}
+@keyframes spinDashArray {
+  0%   { stroke-dasharray: 270 90; }
+  50%  { stroke-dasharray: 0 360; }
+  100% { stroke-dasharray: 270 90; }
+}
+@keyframes dashOffset {
+  0%   { stroke-dashoffset: 365; }
+  100% { stroke-dashoffset: 5; }
+}
+@keyframes spin {
+  0%          { rotate: 0deg; }
+  12.5%, 25%  { rotate: 270deg; }
+  37.5%, 50%  { rotate: 540deg; }
+  62.5%, 75%  { rotate: 810deg; }
+  87.5%, 100% { rotate: 1080deg; }
+}
