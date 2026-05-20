@@ -877,22 +877,48 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       // Flatten the image to remove transparency (alpha channel) and convert to valid JPEG
       const flattenedImageB64 = await new Promise<string>((resolve) => {
         const img = new Image();
+        if (finalDataUrl.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+        }
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-            const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-            resolve(jpegDataUrl.split(',')[1]);
-          } else {
+          try {
+            const canvas = document.createElement('canvas');
+            
+            // Limit max dimension to 1024px to prevent large payloads that cause Gemini API 400 error
+            const MAX_DIM = 1024;
+            let width = img.width;
+            let height = img.height;
+            if (width > MAX_DIM || height > MAX_DIM) {
+              if (width > height) {
+                height = Math.round((height * MAX_DIM) / width);
+                width = MAX_DIM;
+              } else {
+                width = Math.round((width * MAX_DIM) / height);
+                height = MAX_DIM;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(img, 0, 0, width, height);
+              const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+              resolve(jpegDataUrl.split(',')[1]);
+            } else {
+              resolve(finalDataUrl.split(',')[1] || '');
+            }
+          } catch (e) {
+            console.error('Canvas conversion error:', e);
             resolve(finalDataUrl.split(',')[1] || '');
           }
         };
-        img.onerror = () => resolve(finalDataUrl.split(',')[1] || '');
+        img.onerror = (err) => {
+          console.error('Image load error for canvas flattening:', err);
+          resolve(finalDataUrl.split(',')[1] || '');
+        };
         img.src = finalDataUrl;
       });
 
@@ -1714,7 +1740,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     className="text-center py-2 md:py-4 space-y-4 md:space-y-6"
                   >
                     <div className="loader-wrap">
-                      <svg height="0" width="0" viewBox="0 0 64 64" style={{ position: "absolute" }}>
+                      <svg height="1" width="1" style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}>
                         <defs>
                           <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="gp">
                             <stop stopColor="#973BED"></stop>
@@ -1744,28 +1770,28 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
                       <div className="loader">
                         {/* P */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="96" width="96">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gp)"
                             d="M 10,60 V 4 H 42 C 57,4 57,30 42,30 H 10"
                             className="dash" pathLength="360"></path>
                         </svg>
 
                         {/* I */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="96" width="96">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gi)"
                             d="M 16,4 H 48 M 32,4 V 60 M 16,60 H 48"
                             className="dash" pathLength="360"></path>
                         </svg>
 
                         {/* X */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="96" width="96">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gx)"
                             d="M 10,4 L 54,60 M 54,4 L 10,60"
                             className="dash" pathLength="360"></path>
                         </svg>
 
                         {/* O */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="96" width="96">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#go)"
                             d="M 32 32 m 0 -27 a 27 27 0 1 1 0 54 a 27 27 0 1 1 0 -54"
                             className="spin" pathLength="360"></path>

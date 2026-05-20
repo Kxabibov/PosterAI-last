@@ -1371,18 +1371,27 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
+  min-height: 180px;
+  width: 100%;
 }
 .loader {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 8px;
+}
+@media (min-width: 768px) {
+  .loader {
+    gap: 16px;
+  }
 }
 .dash {
-  animation: dashArray 4s ease-in-out infinite, dashOffset 4s linear infinite;
+  animation: dashArray 2s ease-in-out infinite, dashOffset 2s linear infinite;
 }
 .spin {
-  animation: spinDashArray 4s ease-in-out infinite, spin 16s ease-in-out infinite, dashOffset 4s linear infinite;
+  animation: spinDashArray 2s ease-in-out infinite, spin 8s ease-in-out infinite, dashOffset 2s linear infinite;
   transform-origin: center;
 }
 @keyframes dashArray {
