@@ -1739,7 +1739,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     exit={{ opacity: 0 }}
                     className="text-center py-2 md:py-4 space-y-4 md:space-y-6"
                   >
-                    <div className="loader-wrap">
+                    <div className="pixo-loader-wrap">
                       <svg height="1" width="1" style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}>
                         <defs>
                           <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="gp">
@@ -1768,33 +1768,33 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         </defs>
                       </svg>
 
-                      <div className="loader">
+                      <div className="pixo-loader">
                         {/* P */}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gp)"
                             d="M 10,60 V 4 H 42 C 57,4 57,30 42,30 H 10"
-                            className="dash" pathLength="360"></path>
+                            className="pixo-dash" pathLength="360"></path>
                         </svg>
 
                         {/* I */}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gi)"
                             d="M 16,4 H 48 M 32,4 V 60 M 16,60 H 48"
-                            className="dash" pathLength="360"></path>
+                            className="pixo-dash" pathLength="360"></path>
                         </svg>
 
                         {/* X */}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gx)"
                             d="M 10,4 L 54,60 M 54,4 L 10,60"
-                            className="dash" pathLength="360"></path>
+                            className="pixo-dash" pathLength="360"></path>
                         </svg>
 
                         {/* O */}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
                           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#go)"
                             d="M 32 32 m 0 -27 a 27 27 0 1 1 0 54 a 27 27 0 1 1 0 -54"
-                            className="spin" pathLength="360"></path>
+                            className="pixo-spin" pathLength="360"></path>
                         </svg>
                       </div>
                     </div>

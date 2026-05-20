@@ -1367,14 +1367,14 @@ body {
 }
 
 /* Custom PIXO Loader Animation */
-.loader-wrap {
+.pixo-loader-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 180px;
   width: 100%;
 }
-.loader {
+.pixo-loader {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -1383,14 +1383,17 @@ body {
   gap: 8px;
 }
 @media (min-width: 768px) {
-  .loader {
+  .pixo-loader {
     gap: 16px;
   }
 }
-.dash {
+.pixo-loader svg {
+  position: static !important; /* overrides standard .loader svg positioning absolute */
+}
+.pixo-dash {
   animation: dashArray 2s ease-in-out infinite, dashOffset 2s linear infinite;
 }
-.spin {
+.pixo-spin {
   animation: spinDashArray 2s ease-in-out infinite, spin 8s ease-in-out infinite, dashOffset 2s linear infinite;
   transform-origin: center;
 }
