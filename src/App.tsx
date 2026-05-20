@@ -47,6 +47,7 @@ import {
   Moon
 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
+import { ShaderAnimation } from './components/ui/shader-animation';
 
 import { auth, db, storage, googleProvider } from './firebase';
 import { UserProfile, PromptTemplate, FlowStep, UserPoster } from './types';
@@ -64,17 +65,8 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 const Background = ({ theme }: { theme: 'light' | 'dark' }) => (
   <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
-    <video
-      key={theme}
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="absolute top-0 left-0 w-full h-full object-cover"
-    >
-      <source src={`/${theme}.mp4`} type="video/mp4" />
-    </video>
-    <div className={`absolute inset-0 transition-colors duration-700 backdrop-blur-[2px] ${theme === 'dark' ? 'bg-[#0a0d12]/10' : 'bg-[#f4f7fa]/10'}`}></div>
+    <ShaderAnimation />
+    <div className={`absolute inset-0 transition-colors duration-700 backdrop-blur-[2px] ${theme === 'dark' ? 'bg-[#0a0d12]/45' : 'bg-[#f4f7fa]/75'}`}></div>
   </div>
 );
 
