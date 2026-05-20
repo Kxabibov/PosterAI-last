@@ -38,6 +38,7 @@ import {
   ChevronRight,
   X,
   Send,
+  Check,
   Sparkles,
   RefreshCcw,
   Zap,
@@ -1965,13 +1966,6 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       <div
                         className="example-card example-card-glow"
                         key={String(setIdx)+'-'+String(n)}
-                        onMouseMove={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
-                          const y = ((e.clientY - rect.top) / rect.height - 0.5) * -20;
-                          e.currentTarget.style.transform = 'perspective(600px) rotateX('+y+'deg) rotateY('+x+'deg) scale(1.04)';
-                        }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
                       >
                         <img src={'/example'+n+'.jpg'} alt={'Example '+n} />
                       </div>
@@ -1991,14 +1985,18 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
             <div className="comparison-split-wrapper">
               <motion.div initial={{ opacity:0, x:-40 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} className="comparison-split-left">
                 <div className="comparison-split-header">
-                  <div className="comparison-split-icon comparison-split-icon-red">📷</div>
+                  <div className="comparison-split-icon comparison-split-icon-red">
+                    <Camera size={24} className="text-red-400" />
+                  </div>
                   <h3 className="font-['Orbitron'] text-xl font-bold text-red-400">{t.compTraditionalTitle}</h3>
                   <p className="text-red-400/70 text-sm font-medium mt-1">⏱ {t.compTraditionalTime}</p>
                 </div>
                 <div className="space-y-4 mt-6">
                   {[t.compTraditional1, t.compTraditional2, t.compTraditional3].map((item, i) => (
                     <div key={i} className="comparison-item comparison-item-bad">
-                      <div className="comparison-item-icon comparison-item-icon-bad">✕</div>
+                      <div className="comparison-item-icon comparison-item-icon-bad">
+                        <X size={12} className="text-red-400" />
+                      </div>
                       <span>{item}</span>
                     </div>
                   ))}
@@ -2013,14 +2011,18 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               </div>
               <motion.div initial={{ opacity:0, x:40 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} className="comparison-split-right">
                 <div className="comparison-split-header">
-                  <div className="comparison-split-icon comparison-split-icon-blue">⚡</div>
+                  <div className="comparison-split-icon comparison-split-icon-blue">
+                    <Sparkles size={24} className="text-[#4fc3f7]" />
+                  </div>
                   <h3 className="font-['Orbitron'] text-xl font-bold bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">{t.compAiTitle}</h3>
                   <p className="text-[#4fc3f7]/80 text-sm font-medium mt-1">✦ AI-Powered, instant results</p>
                 </div>
                 <div className="space-y-4 mt-6">
                   {[t.compAi1, t.compAi2, t.compAi3].map((item, i) => (
                     <div key={i} className="comparison-item comparison-item-good">
-                      <div className="comparison-item-icon comparison-item-icon-good">✓</div>
+                      <div className="comparison-item-icon comparison-item-icon-good">
+                        <Check size={12} className="text-[#22c55e]" />
+                      </div>
                       <span>{item}</span>
                     </div>
                   ))}
@@ -2038,37 +2040,41 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 <h2 className="font-['Orbitron'] text-2xl md:text-3xl font-extrabold tracking-tighter text-white mb-3">{t.pricingTitle}</h2>
                 <p className="text-white/60 text-sm md:text-base">{t.pricingDesc}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                  { name: 'Basic', price: '75,000', credits: 50, icon: '🌱', blobColor: 'rgba(79,195,247,0.5)' },
-                  { name: 'Standard', price: '150,000', credits: 150, icon: '🚀', popular: true, saving: 'Save 33%', originalPrice: '225,000', blobColor: 'rgba(79,195,247,0.8)' },
-                  { name: 'Premium', price: '250,000', credits: 300, icon: '👑', saving: 'Save 44%', originalPrice: '450,000', blobColor: 'rgba(34,197,94,0.6)' }
+                  { name: 'Basic', price: '75,000', credits: 50, icon: Sparkles, iconClass: 'text-[#4fc3f7]/70', blobColor: 'rgba(79,195,247,0.3)' },
+                  { name: 'Standard', price: '150,000', credits: 150, icon: Zap, iconClass: 'text-yellow-400 animate-pulse', popular: true, saving: 'Save 33%', originalPrice: '225,000', blobColor: 'rgba(79,195,247,0.6)' },
+                  { name: 'Premium', price: '250,000', credits: 300, icon: ShieldCheck, iconClass: 'text-green-400', saving: 'Save 44%', originalPrice: '450,000', blobColor: 'rgba(34,197,94,0.4)' }
                 ].map((plan, i) => (
-                  <motion.div key={i} initial={{ opacity:0, y:30 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay: i * 0.1 }} className={"pricing-card-animated flex flex-col" + (plan.popular ? " popular-animated" : "")}>
-                    <div className="pricing-blob" style={{ background: plan.blobColor }}></div>
-                    <div className="pricing-inner">
-                      {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#4fc3f7] text-[#0a0d12] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(79,195,247,0.5)] z-10">{t.mostPopular}</div>}
-                      <div className="text-3xl mb-4">{plan.icon}</div>
-                      <h3 className="font-['Orbitron'] text-2xl font-bold text-white mb-1">{plan.name}</h3>
-                      <div className="flex items-center flex-wrap gap-2 mb-6 relative">
-                        {plan.originalPrice && <span className="text-sm font-bold text-white/30 line-through">{plan.originalPrice}</span>}
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-2xl font-bold text-[#4fc3f7] drop-shadow-[0_0_8px_rgba(79,195,247,0.6)]">{plan.price}</span>
-                          <span className="text-sm text-white/50">UZS</span>
+                  <motion.div key={i} initial={{ opacity:0, y:30 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay: i * 0.1 }} className={"pricing-card-animated flex flex-col relative overflow-visible" + (plan.popular ? " popular-animated" : "")}>
+                    {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1a7aad] to-[#4fc3f7] text-[#0a0d12] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(79,195,247,0.5)] z-20">{t.mostPopular}</div>}
+                    <div className="pricing-card-border-wrap relative overflow-hidden rounded-[32px] w-full h-full flex flex-col flex-1">
+                      <div className="pricing-blob" style={{ background: plan.blobColor }}></div>
+                      <div className="pricing-inner">
+                        <div className="mb-4">
+                          <plan.icon size={32} className={plan.iconClass} />
                         </div>
-                        {plan.saving && <span className="absolute -top-6 right-0 text-[10px] font-bold text-[#1a7aad] bg-[#4fc3f7] px-2 py-1 rounded-md">{plan.saving}</span>}
+                        <h3 className="font-['Orbitron'] text-2xl font-bold text-white mb-1">{plan.name}</h3>
+                        <div className="flex items-center flex-wrap gap-2 mb-6 relative">
+                          {plan.originalPrice && <span className="text-sm font-bold text-white/30 line-through">{plan.originalPrice}</span>}
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-[#4fc3f7] drop-shadow-[0_0_8px_rgba(79,195,247,0.6)]">{plan.price}</span>
+                            <span className="text-sm text-white/50">UZS</span>
+                          </div>
+                          {plan.saving && <span className="absolute -top-6 right-0 text-[10px] font-bold text-[#1a7aad] bg-[#4fc3f7] px-2 py-1 rounded-md">{plan.saving}</span>}
+                        </div>
+                        <div className="space-y-4 mb-6 flex-1">
+                          <div className="flex items-center gap-3 text-sm"><CheckCircle2 size={14} className="text-[#4fc3f7]" /><span className="text-white font-bold">{plan.credits} {t.credits}</span></div>
+                          <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>AI Poster Generation</span></div>
+                          <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>Background Removal</span></div>
+                        </div>
+                        <a href={"https://t.me/kxabibov?text=Hello! I want to buy the "+plan.name+" plan ("+plan.credits+" credits) for "+plan.price+" UZS."} target="_blank" rel="noreferrer" className="pricing-cta-btn">
+                          <div className="pricing-cta-blob-violet"></div>
+                          <div className="pricing-cta-blob-aqua"></div>
+                          <Send size={16} className="relative z-10" />
+                          <span className="relative z-10">{t.contactTelegram}</span>
+                        </a>
                       </div>
-                      <div className="space-y-4 mb-6 flex-1">
-                        <div className="flex items-center gap-3 text-sm"><CheckCircle2 size={14} className="text-[#4fc3f7]" /><span className="text-white font-bold">{plan.credits} {t.credits}</span></div>
-                        <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>AI Poster Generation</span></div>
-                        <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>Background Removal</span></div>
-                      </div>
-                      <a href={"https://t.me/kxabibov?text=Hello! I want to buy the "+plan.name+" plan ("+plan.credits+" credits) for "+plan.price+" UZS."} target="_blank" rel="noreferrer" className="pricing-cta-btn">
-                        <div className="pricing-cta-blob-violet"></div>
-                        <div className="pricing-cta-blob-aqua"></div>
-                        <Send size={16} className="relative z-10" />
-                        <span className="relative z-10">{t.contactTelegram}</span>
-                      </a>
                     </div>
                   </motion.div>
                 ))}
@@ -2093,7 +2099,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="max-w-2xl mx-auto glow-box rounded-3xl p-8 md:p-12 space-y-6"
+                className="max-w-2xl mx-auto space-y-6 py-8"
               >
                 <h2 className="font-['Orbitron'] text-2xl md:text-4xl font-extrabold tracking-tighter text-white">
                   {t.ctaTitle}

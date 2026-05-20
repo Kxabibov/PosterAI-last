@@ -671,10 +671,10 @@ body {
   background-image: linear-gradient(#ffffff, #ffffff),
     linear-gradient(
       137.48deg,
-      #ffdb3b 10%,
-      #fe53bb 45%,
-      #8f51ea 67%,
-      #0044ff 87%
+      #00f2fe 10%,
+      #4fc3f7 40%,
+      #22c55e 70%,
+      #a8ff78 95%
     );
   background-origin: border-box;
   background-clip: content-box, border-box;
@@ -685,10 +685,10 @@ body {
   background-image: linear-gradient(#000000, #000000),
     linear-gradient(
       137.48deg,
-      #ffdb3b 10%,
-      #fe53bb 45%,
-      #8f51ea 67%,
-      #0044ff 87%
+      #00f2fe 10%,
+      #4fc3f7 40%,
+      #22c55e 70%,
+      #a8ff78 95%
     );
 }
 
@@ -732,16 +732,16 @@ body {
 }
 
 .btn-space .circle:nth-of-type(1) {
-  background: rgba(254, 83, 186, 0.636);
+  background: rgba(79, 195, 247, 0.6);
 }
 
 .btn-space .circle:nth-of-type(2) {
-  background: rgba(142, 81, 234, 0.704);
+  background: rgba(34, 197, 94, 0.5);
 }
 
 .btn-space:hover #container-stars {
   z-index: 1;
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .dark .btn-space:hover #container-stars {
@@ -778,8 +778,12 @@ body {
   width: 100%;
   height: 100%;
   animation: animStarRotate 90s linear infinite;
-  background-image: radial-gradient(#ffffff 1px, transparent 1%);
+  background-image: radial-gradient(#1a7aad 1px, transparent 1%);
   background-size: 50px 50px;
+}
+
+.dark .btn-space #stars::after {
+  background-image: radial-gradient(#ffffff 1px, transparent 1%);
 }
 
 .btn-space #stars::before {
@@ -790,9 +794,13 @@ body {
   width: 170%;
   height: 500%;
   animation: animStar 60s linear infinite;
-  background-image: radial-gradient(#ffffff 1px, transparent 1%);
+  background-image: radial-gradient(#1a7aad 1px, transparent 1%);
   background-size: 50px 50px;
   opacity: 0.5;
+}
+
+.dark .btn-space #stars::before {
+  background-image: radial-gradient(#ffffff 1px, transparent 1%);
 }
 
 @keyframes animStar {
@@ -837,8 +845,8 @@ body {
 
 .blob-card {
   position: relative;
-  width: 310px;
-  height: 380px;
+  width: 300px;
+  height: 350px;
   border-radius: 20px;
   z-index: 10;
   overflow: hidden;
@@ -846,18 +854,18 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: linear-gradient(0deg, transparent, transparent, #4fc3f7, #4fc3f7);
+  background: linear-gradient(0deg, transparent, transparent, #ffffff, #ffffff);
   transition: transform 800ms cubic-bezier(0.16, 1, 0.3, 1), filter 800ms cubic-bezier(0.16, 1, 0.3, 1), opacity 800ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .blob-card::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(from 0deg, transparent 40%, #1a7aad 60%, #4fc3f7 80%, transparent 100%);
+  top: -30%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  background: conic-gradient(from 0deg, transparent 40%, rgba(255,255,255,0.2) 65%, rgba(255,255,255,0.85) 85%, transparent 100%);
   animation: rotate-border-glow 6s linear infinite;
   z-index: 1;
 }
@@ -876,7 +884,7 @@ body {
 .blob-card:hover {
   transform: scale(1.08) translateZ(10px);
   z-index: 20;
-  box-shadow: 0 15px 40px rgba(79, 195, 247, 0.25);
+  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.15);
 }
 
 .blob-card-bg {
@@ -892,16 +900,16 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 1.5rem;
+  padding: 1rem;
   transition: background 0.3s ease;
 }
 
 .blob-card-bg img {
   width: 100%;
-  height: 180px;
+  height: 200px;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   transition: transform 0.5s ease;
 }
 
@@ -929,20 +937,20 @@ body {
 }
 
 /* ═══════════════════════════════════════════
-   Example Cards Blue Border Glow
+   Example Cards White Border Glow
    ═══════════════════════════════════════════ */
 .example-card-glow {
-  --glow-color: #4fc3f7;
+  --glow-color: #ffffff;
   position: relative;
   overflow: hidden;
   border: 2px solid var(--glow-color);
-  background: linear-gradient(to right, rgba(79, 195, 247, 0.1) 1%, transparent 40%, transparent 60%, rgba(79, 195, 247, 0.1) 100%);
-  box-shadow: inset 0 0 10px rgba(79, 195, 247, 0.4), 0 0 9px 3px rgba(79, 195, 247, 0.1);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1%, transparent 40%, transparent 60%, rgba(255, 255, 255, 0.1) 100%);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.4), 0 0 9px 3px rgba(255, 255, 255, 0.1);
   transition: all 0.3s;
 }
 
 .example-card-glow:hover {
-  box-shadow: inset 0 0 10px rgba(79, 195, 247, 0.6), 0 0 9px 3px rgba(79, 195, 247, 0.2);
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.6), 0 0 15px 4px rgba(255, 255, 255, 0.2);
 }
 
 .example-card-glow::before {
@@ -953,7 +961,7 @@ body {
   height: 100%;
   top: 0;
   transition: transform .4s ease-in-out;
-  background: linear-gradient(to right, transparent 1%, rgba(79, 195, 247, 0.25) 40%, rgba(79, 195, 247, 0.25) 60%, transparent 100%);
+  background: linear-gradient(to right, transparent 1%, rgba(255, 255, 255, 0.25) 40%, rgba(255, 255, 255, 0.25) 60%, transparent 100%);
   z-index: 10;
   pointer-events: none;
 }
@@ -1191,7 +1199,6 @@ body {
 .pricing-card-animated {
   position: relative;
   border-radius: 32px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   background: transparent;
@@ -1201,7 +1208,25 @@ body {
 
 .pricing-card-animated:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 45px rgba(79, 195, 247, 0.1);
+}
+
+.pricing-card-border-wrap::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent 40%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0.45) 80%, transparent 100%);
+  animation: rotate-border-glow 8s linear infinite;
+  z-index: 1;
+}
+
+/* Standard/Popular stands out with a brighter, colorful border glow */
+.pricing-card-animated.popular-animated .pricing-card-border-wrap::before {
+  background: conic-gradient(from 0deg, transparent 30%, #4fc3f7 50%, #8f51ea 75%, transparent 100%);
+  animation: rotate-border-glow 4s linear infinite; /* Faster rotation and brighter */
 }
 
 .pricing-blob {
@@ -1210,7 +1235,7 @@ body {
   height: 280px;
   border-radius: 50%;
   filter: blur(75px);
-  opacity: 0.28;
+  opacity: 0.18;
   z-index: 1;
   top: -120px;
   left: -120px;
@@ -1219,16 +1244,16 @@ body {
 
 .pricing-card-animated:hover .pricing-blob {
   transform: translate(40px, 40px);
-  opacity: 0.38;
+  opacity: 0.28;
 }
 
 .pricing-inner {
   position: relative;
   z-index: 2;
   flex: 1;
-  padding: 2.5rem;
-  background: var(--glow-bg-sm);
-  border: 1.5px solid var(--glow-border);
+  padding: 2.2rem;
+  background: rgba(255, 255, 255, 0.02); /* Transparent boxes */
+  border: 1.5px solid rgba(255, 255, 255, 0.08); /* Minimal border */
   backdrop-filter: blur(24px);
   border-radius: 32px;
   display: flex;
@@ -1237,8 +1262,9 @@ body {
 }
 
 .pricing-card-animated.popular-animated .pricing-inner {
-  border-color: rgba(79, 195, 247, 0.35);
-  box-shadow: inset 0 0 24px rgba(79, 195, 247, 0.08);
+  background: rgba(79, 195, 247, 0.02);
+  border-color: rgba(79, 195, 247, 0.25);
+  box-shadow: inset 0 0 24px rgba(79, 195, 247, 0.05);
 }
 
 .pricing-cta-btn {
