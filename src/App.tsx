@@ -904,7 +904,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
       setGenStep(2);
       const result = await ai.models.generateContent({
-        model: "gemini-3.1-flash-image-preview",
+        model: "gemini-3-pro-image-preview",
         contents: [
           prompt,
           {
