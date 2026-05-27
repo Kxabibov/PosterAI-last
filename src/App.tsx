@@ -18,7 +18,11 @@ import {
   onSnapshot,
   query,
   orderBy,
-  where
+  where,
+  limit,
+  startAfter,
+  QueryDocumentSnapshot,
+  DocumentData
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, uploadString, deleteObject } from 'firebase/storage';
 import { motion, AnimatePresence } from 'motion/react';
@@ -44,9 +48,9 @@ import {
   Zap,
   Menu,
   Sun,
-  Moon
+  Moon,
+  ArrowLeft
 } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
 import { ShaderAnimation } from './components/ui/shader-animation';
 
 import { auth, db, storage, googleProvider } from './firebase';
@@ -55,11 +59,7 @@ import { handleFirestoreError, OperationType } from './lib/firestoreUtils';
 
 // Constants
 const ADMIN_EMAILS = ["habibovkomron007@gmail.com"];
-const REMOVEBG_API_KEY = process.env.REMOVEBG_API_KEY || "S8y652u43JuvMVLp96gf6sHT";
 const CREDITS_PER_GEN = 10;
-
-// Initialize Gemini
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 // --- Components ---
 
@@ -257,6 +257,9 @@ export default function App() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   // Inventory State
   const [userPosters, setUserPosters] = useState<UserPoster[]>([]);
+  const [lastVisiblePoster, setLastVisiblePoster] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMorePosters, setHasMorePosters] = useState<boolean>(true);
+  const [isLoadingPosters, setIsLoadingPosters] = useState<boolean>(false);
   
   // Draggable Carousels
   const marqueeScroll = useDraggableAutoScroll(0.8, 'left', 4);
@@ -273,9 +276,40 @@ export default function App() {
   const [appLanguage, setAppLanguage] = useState<'English' | 'Russian' | 'Uzbek'>('English');
   const [showCookieBanner, setShowCookieBanner] = useState(() => !localStorage.getItem('cookieConsent'));
 
+  // Synchronize history with flowStep changes
+  useEffect(() => {
+    if (!window.history.state) {
+      window.history.replaceState({ flowStep: 0 }, "Step 0");
+    }
+  }, []);
+
+  useEffect(() => {
+    const currentState = window.history.state;
+    if (!currentState || currentState.flowStep !== flowStep) {
+      window.history.pushState({ flowStep }, `Step ${flowStep}`);
+    }
+  }, [flowStep]);
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && typeof event.state.flowStep === 'number') {
+        if (isGenerating || isRemovingBg) {
+          window.history.pushState({ flowStep }, `Step ${flowStep}`);
+          return;
+        }
+        setFlowStep(event.state.flowStep);
+      } else {
+        setFlowStep(0);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isGenerating, isRemovingBg, flowStep]);
+
   const translations = {
     English: {
       heroTitle: <>Product card created<br />before your <span className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">coffee cools</span></>,
+      backBtn: "Back",
       startBtn: "Start Creating",
       credits: "credits",
       buy: "Buy",
@@ -301,6 +335,7 @@ export default function App() {
       genCost: "Costs 10 credits per generation",
       genTitle: "Generating your poster…",
       genDesc: "Our AI is crafting 4 unique variations for you",
+      cookingText: "Magic is happening... your image is being cooked!",
       genSteps: ['Preparing image', 'Sending to Gemini AI', 'Generating 4 variations', 'Splitting into tiles', 'Finalizing'],
       readyTitle: "✦ Your Poster is Ready",
       readyDesc: "Download your favorite variations",
@@ -357,7 +392,7 @@ export default function App() {
       compTraditional1: "Studio setup and photographers",
       compTraditional2: "Editing and endless revisions",
       compTraditional3: "Expensive for every product",
-      compAiTitle: "Pixo AI",
+      compAiTitle: "Nidu AI",
       compAi1: "No complicated tools",
       compAi2: "Endless styles and concepts",
       compAi3: "Create more while spending less",
@@ -386,6 +421,7 @@ export default function App() {
     },
     Russian: {
       heroTitle: <>Карточка товара готова,<br />пока ваш <span className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">кофе остывает</span></>,
+      backBtn: "Назад",
       startBtn: "Начать создание",
       credits: "кредитов",
       buy: "Купить",
@@ -411,6 +447,7 @@ export default function App() {
       genCost: "Стоимость: 10 кредитов",
       genTitle: "Создаем ваш постер…",
       genDesc: "Наш ИИ готовит 4 уникальных варианта для вас",
+      cookingText: "Магия в процессе... ваше изображение готовится!",
       genSteps: ['Подготовка изображения', 'Отправка в Gemini AI', 'Генерация 4 вариантов', 'Разделение на части', 'Финализация'],
       readyTitle: "✦ Ваш постер готов",
       readyDesc: "Скачайте понравившиеся варианты",
@@ -463,7 +500,7 @@ export default function App() {
       compTraditional1: "Студия и фотографы",
       compTraditional2: "Редактирование и бесконечные правки",
       compTraditional3: "Дорого для каждого товара",
-      compAiTitle: "Pixo AI",
+      compAiTitle: "Nidu AI",
       compAi1: "Никаких сложных инструментов",
       compAi2: "Бесконечные стили и концепции",
       compAi3: "Создавайте больше, тратя меньше",
@@ -488,6 +525,7 @@ export default function App() {
     },
     Uzbek: {
       heroTitle: <>Qahvangiz sovuguncha<br /><span className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">mahsulot kartasi</span> tayyor</>,
+      backBtn: "Orqaga",
       startBtn: "Yaratishni boshlash",
       credits: "kredit",
       buy: "Sotib olish",
@@ -513,6 +551,7 @@ export default function App() {
       genCost: "Har bir yaratish uchun 10 kredit",
       genTitle: "Poster yaratilmoqda…",
       genDesc: "Bizning AI siz uchun 4 ta noyob variant tayyorlamoqda",
+      cookingText: "Sehrli jarayon... rasmingiz tayyorlanmoqda!",
       genSteps: ['Rasmni tayyorlash', 'Gemini AI ga yuborish', '4 xil variant yaratish', 'Qismlarga ajratish', 'Yakunlash'],
       readyTitle: "✦ Posteringiz tayyor",
       readyDesc: "Yoqqan variantlarni yuklab oling",
@@ -565,7 +604,7 @@ export default function App() {
       compTraditional1: "Studiya va fotograflar",
       compTraditional2: "Tahrirlash va cheksiz tuzatishlar",
       compTraditional3: "Har bir mahsulot uchun qimmat",
-      compAiTitle: "Pixo AI",
+      compAiTitle: "Nidu AI",
       compAi1: "Murakkab vositalar kerak emas",
       compAi2: "Cheksiz uslub va konseptlar",
       compAi3: "Kam sarflab ko'proq yarating",
@@ -632,6 +671,61 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  const fetchFirstPagePosters = async () => {
+    if (!user) return;
+    setIsLoadingPosters(true);
+    try {
+      const q = query(
+        collection(db, 'posters'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc'),
+        limit(12)
+      );
+      const snap = await getDocs(q);
+      const list: UserPoster[] = [];
+      snap.forEach(d => {
+        list.push({ id: d.id, ...d.data() } as UserPoster);
+      });
+      setUserPosters(list);
+      
+      const last = snap.docs[snap.docs.length - 1] || null;
+      setLastVisiblePoster(last);
+      setHasMorePosters(snap.docs.length === 12);
+    } catch (error) {
+      console.error('Error fetching posters:', error);
+    } finally {
+      setIsLoadingPosters(false);
+    }
+  };
+
+  const fetchNextPagePosters = async () => {
+    if (!user || !lastVisiblePoster || isLoadingPosters) return;
+    setIsLoadingPosters(true);
+    try {
+      const q = query(
+        collection(db, 'posters'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisiblePoster),
+        limit(12)
+      );
+      const snap = await getDocs(q);
+      const list: UserPoster[] = [];
+      snap.forEach(d => {
+        list.push({ id: d.id, ...d.data() } as UserPoster);
+      });
+      setUserPosters(prev => [...prev, ...list]);
+      
+      const last = snap.docs[snap.docs.length - 1] || null;
+      setLastVisiblePoster(last);
+      setHasMorePosters(snap.docs.length === 12);
+    } catch (error) {
+      console.error('Error fetching next page of posters:', error);
+    } finally {
+      setIsLoadingPosters(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       const qPrompts = query(collection(db, 'prompts'));
@@ -643,16 +737,9 @@ export default function App() {
         console.error('Error fetching prompts:', error);
       });
 
-      const qPosters = query(collection(db, 'posters'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
-      const unsubPosters = onSnapshot(qPosters, (snap) => {
-        const postersList: UserPoster[] = [];
-        snap.forEach(d => postersList.push({ id: d.id, ...d.data() } as UserPoster));
-        setUserPosters(postersList);
-      }, (error) => {
-        console.error('Error fetching posters:', error);
-      });
+      fetchFirstPagePosters();
 
-      return () => { unsubPrompts(); unsubPosters(); };
+      return () => { unsubPrompts(); };
     }
   }, [user]);
 
@@ -773,7 +860,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       const dataUrl = event.target?.result as string;
       setUploadedImage(dataUrl);
       setFlowStep(2);
-      removeBackground(file);
+      removeBackground(file, dataUrl);
     };
     reader.readAsDataURL(file);
   };
@@ -793,22 +880,29 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
     e.preventDefault();
   };
 
-  const removeBackground = async (file: File) => {
+  const removeBackground = async (file: File, fallbackDataUrl: string) => {
+    if (isRemovingBg) return;
     setIsRemovingBg(true);
     setBgError(false);
     try {
-      const formData = new FormData();
-      formData.append('image_file', file);
-      formData.append('size', 'auto');
-      const res = await fetch('https://api.remove.bg/v1.0/removebg', {
-        method: 'POST',
-        headers: { 'X-Api-Key': REMOVEBG_API_KEY },
-        body: formData
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1] || '');
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
+
+      const res = await fetch('/api/removebg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_b64: base64Image })
+      });
+
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        const message = errorData.errors?.[0]?.title || `Status ${res.status}`;
-        throw new Error(`Remove.bg error: ${message}`);
+        throw new Error(`Remove.bg proxy error: Status ${res.status}`);
       }
       const blob = await res.blob();
       const reader = new FileReader();
@@ -822,7 +916,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       console.error(e);
       setIsRemovingBg(false);
       setBgError(true);
-      setProcessedImage(uploadedImage); // Fallback
+      setProcessedImage(fallbackDataUrl); // Fallback
     }
   };
 
@@ -847,11 +941,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
   };
 
   const startGeneration = async () => {
-    const key = process.env.GEMINI_API_KEY;
-    if (!key || key === 'undefined' || key === 'null' || key.length < 5) {
-      addToast('Gemini API Key is missing. Please check your environment variables in Settings.', 'error');
-      return;
-    }
+    if (isGenerating) return;
     if (!selectedStyle || !profile) return;
     const cost = selectedStyle.isSolo ? 5 : CREDITS_PER_GEN;
     if (profile.credits < cost) {
@@ -863,6 +953,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
     setFlowStep(4);
     setGenStep(1);
 
+    const uploadedRefs: any[] = [];
     try {
       let prompt = selectedStyle.promptText.replace('[PRODUCT NAME]', productName || 'Product');
       if (language !== 'English') {
@@ -872,7 +963,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
         prompt += `\n\nAdditions to prompt: ${promptAddition}`;
       }
 
-      const finalDataUrl = processedImage || '';
+      const finalDataUrl = processedImage || uploadedImage || '';
       
       // Flatten the image to remove transparency (alpha channel) and convert to valid JPEG
       const flattenedImageB64 = await new Promise<string>((resolve) => {
@@ -923,22 +1014,21 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       });
 
       setGenStep(2);
-      const result = await ai.models.generateContent({
-        model: "gemini-3-pro-image-preview",
-        contents: [
-          prompt,
-          {
-            inlineData: {
-              mimeType: "image/jpeg",
-              data: flattenedImageB64
-            }
-          }
-        ],
-        config: {
-          responseModalities: ["IMAGE"]
-        }
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: prompt,
+          image_b64: flattenedImageB64
+        })
       });
 
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `Proxy error: Status ${res.status}`);
+      }
+
+      const result = await res.json();
       setGenStep(3);
       const response = result;
       let generatedImageB64 = '';
@@ -964,24 +1054,30 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       }
       setGeneratedTiles(tiles);
 
-      // Upload tiles to Storage and save poster document
-      const uploadedUrls: string[] = [];
+      // Upload tiles to Storage in parallel
       const posterId = Date.now().toString();
-      
-      for (let i = 0; i < tiles.length; i++) {
-        const tileRef = ref(storage, `users/${profile.uid}/posters/${posterId}_tile_${i}.jpg`);
-        await uploadString(tileRef, tiles[i], 'data_url');
-        const url = await getDownloadURL(tileRef);
-        uploadedUrls.push(url);
-      }
+      const uploadPromises = tiles.map(async (tile, i) => {
+        const tileRef = ref(storage, `users/${profile.uid}/posters/${posterId}_tile_${i}.webp`);
+        uploadedRefs.push(tileRef);
+        await uploadString(tileRef, tile, 'data_url');
+        return getDownloadURL(tileRef);
+      });
 
-      await addDoc(collection(db, 'posters'), {
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      const newPosterDoc = {
         userId: profile.uid,
-        createdAt: serverTimestamp(),
         tiles: uploadedUrls,
         productName: productName || 'Product',
         promptName: selectedStyle.name
+      };
+
+      const docRef = await addDoc(collection(db, 'posters'), {
+        ...newPosterDoc,
+        createdAt: serverTimestamp()
       });
+
+      setUserPosters(prev => [{ id: docRef.id, createdAt: { toDate: () => new Date() }, ...newPosterDoc } as any, ...prev]);
 
       // Deduct credits
       const userRef = doc(db, 'users', profile.uid);
@@ -993,6 +1089,16 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       addToast('Poster generated successfully!', 'success');
     } catch (error: any) {
       console.error(error);
+      // Clean up any successfully uploaded tiles to prevent orphaned files on network disruption
+      if (uploadedRefs.length > 0) {
+        for (const tileRef of uploadedRefs) {
+          try {
+            await deleteObject(tileRef);
+          } catch (delErr) {
+            console.error('Failed to cleanup file:', tileRef.fullPath, delErr);
+          }
+        }
+      }
       addToast('Generation failed: ' + error.message, 'error');
       setFlowStep(3);
     } finally {
@@ -1010,7 +1116,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
           const c = document.createElement('canvas');
           c.width = hw; c.height = hh;
           c.getContext('2d')?.drawImage(img, sx, sy, hw, hh, 0, 0, hw, hh);
-          return c.toDataURL('image/jpeg', 0.95);
+          return c.toDataURL('image/webp', 0.8);
         });
         resolve(tiles);
       };
@@ -1132,9 +1238,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
             className="flex items-center gap-2 md:gap-3 cursor-pointer"
             onClick={() => { setFlowStep(0); setAdminTab(null); }}
           >
-            <img src="/logo.png" alt="Pixo AI" className="h-6 md:h-8 object-contain drop-shadow-[0_0_8px_rgba(79,195,247,0.35)]" />
+            <img src="/logo.png" alt="Nidu AI" className="h-6 md:h-8 object-contain drop-shadow-[0_0_8px_rgba(79,195,247,0.35)]" />
             <span className="font-['Orbitron'] text-lg md:text-lg font-extrabold tracking-tighter bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">
-              Pixo AI
+              Nidu AI
             </span>
             {profile && (
               <span className="md:hidden ml-2 font-['Orbitron'] text-[10px] font-bold text-[#1a7aad] dark:text-[#4fc3f7] bg-[#4fc3f7]/10 px-2 py-0.5 rounded-full border border-[#4fc3f7]/20">
@@ -1242,7 +1348,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
           >
             <div className="flex items-center justify-between pb-2 border-b border-[#dde3ea]/50 dark:border-white/10">
               <span className="font-['Orbitron'] text-sm font-extrabold tracking-tighter bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">
-                Pixo AI
+                Nidu AI
               </span>
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 text-[#6b7a8d] hover:text-[#0d1520] transition-colors">
                 <X size={18} />
@@ -1434,22 +1540,53 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               exit={{ opacity: 0 }}
               className="max-w-3xl mx-auto"
             >
-              {/* Step Indicator */}
+              {/* Back Button and Step Indicator */}
               {flowStep > 0 && (
-                <div className="flex items-center justify-center gap-4 mb-12">
-                  {[1, 2, 3, 4].map(s => (
-                    <React.Fragment key={s}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${flowStep === s ? 'bg-[#4fc3f7]/15 text-[#1a7aad] border border-[#4fc3f7]/40' :
-                        flowStep > s ? 'bg-[#4fc3f7]/15 text-[#1a7aad] border border-[#4fc3f7]/30' :
-                          'bg-white/5 dark:bg-white/10 text-[#6b7a8d] border border-[#dde3ea] dark:border-white/20/40'
-                        }`}>
-                        {flowStep > s ? <CheckCircle2 size={14} /> : s}
-                      </div>
-                      {s < 4 && (
-                        <div className={`w-12 h-[1px] ${flowStep > s ? 'bg-[#4fc3f7]' : 'bg-white/10'}`} />
-                      )}
-                    </React.Fragment>
-                  ))}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 sm:mb-12">
+                  {/* Back Button */}
+                  {flowStep !== 4 && (
+                    <button
+                      onClick={() => {
+                        window.history.back();
+                      }}
+                      disabled={isRemovingBg}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-['Orbitron'] tracking-wider uppercase border transition-all duration-300 ${
+                        isRemovingBg 
+                          ? 'opacity-50 cursor-not-allowed border-transparent bg-white/5 text-gray-500' 
+                          : 'border-white/10 bg-white/5 hover:bg-[#1a7aad]/20 hover:border-[#4fc3f7]/50 text-gray-300 hover:text-white drop-shadow-[0_0_15px_rgba(79,195,247,0.1)]'
+                      }`}
+                    >
+                      <ArrowLeft size={14} />
+                      {t.backBtn}
+                    </button>
+                  )}
+                  {flowStep === 4 && <div className="hidden sm:block w-24" />}
+
+                  {/* Step Indicator */}
+                  {flowStep <= 4 ? (
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      {[1, 2, 3, 4].map(s => (
+                        <React.Fragment key={s}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                            flowStep === s 
+                              ? 'bg-[#4fc3f7]/15 text-[#4fc3f7] border border-[#4fc3f7] shadow-[0_0_15px_rgba(79,195,247,0.4)]' :
+                            flowStep > s 
+                              ? 'bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/40' :
+                              'bg-white/5 dark:bg-white/10 text-[#6b7a8d] border border-[#dde3ea] dark:border-white/10'
+                          }`}>
+                            {flowStep > s ? <CheckCircle2 size={14} /> : s}
+                          </div>
+                          {s < 4 && (
+                            <div className={`w-8 sm:w-12 h-[1px] transition-colors duration-300 ${flowStep > s ? 'bg-[#22c55e]' : 'bg-white/10'}`} />
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+
+                  {flowStep !== 4 && <div className="hidden sm:block w-24" />}
                 </div>
               )}
 
@@ -1716,7 +1853,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <div className="text-center pt-4">
                       <button
                         onClick={startGeneration}
-                        disabled={!selectedStyle}
+                        disabled={!selectedStyle || isGenerating}
                         className="btn-glossy text-[#1a7aad] px-8 py-3 md:px-10 md:py-4 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed gap-2 md:gap-3 mx-auto"
                       >
                         <Zap size={20} />
@@ -1739,68 +1876,135 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     exit={{ opacity: 0 }}
                     className="text-center py-2 md:py-4 space-y-4 md:space-y-6"
                   >
-                    <div className="pixo-loader-wrap">
-                      <svg height="1" width="1" style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}>
-                        <defs>
-                          <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="gp">
-                            <stop stopColor="#973BED"></stop>
-                            <stop stopColor="#007CFF" offset="1"></stop>
-                          </linearGradient>
-                          <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="gi">
-                            <stop stopColor="#FF6B35"></stop>
-                            <stop stopColor="#FF0080" offset="1"></stop>
-                          </linearGradient>
-                          <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="gx">
-                            <stop stopColor="#00E0ED"></stop>
-                            <stop stopColor="#00DA72" offset="1"></stop>
-                          </linearGradient>
-                          <linearGradient gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="go">
-                            <stop stopColor="#FFC800"></stop>
-                            <stop stopColor="#FF00FF" offset="1"></stop>
-                            <animateTransform repeatCount="indefinite"
-                              keySplines=".42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1"
-                              keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1"
-                              dur="8s"
-                              values="0 32 32;-270 32 32;-270 32 32;-540 32 32;-540 32 32;-810 32 32;-810 32 32;-1080 32 32;-1080 32 32"
-                              type="rotate" attributeName="gradientTransform">
-                            </animateTransform>
-                          </linearGradient>
-                        </defs>
+                    <div className="nidu-loader-wrap">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="w-48 h-48 md:w-64 md:h-64 mx-auto">
+                        <g style={{ order: -1 }}>
+                          <polygon
+                            transform="rotate(45 100 100)"
+                            strokeWidth="1"
+                            stroke="#17afbd"
+                            fill="none"
+                            points="70,70 148,50 130,130 50,150"
+                            className="loader-bounce"
+                          ></polygon>
+                          <polygon
+                            transform="rotate(45 100 100)"
+                            strokeWidth="1"
+                            stroke="#07e7fca4"
+                            fill="none"
+                            points="70,70 148,50 130,130 50,150"
+                            className="loader-bounce2"
+                          ></polygon>
+                          <polygon
+                            transform="rotate(45 100 100)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#414750"
+                            points="70,70 150,50 130,130 50,150"
+                          ></polygon>
+                          <polygon
+                            strokeWidth="2"
+                            stroke=""
+                            fill="url(#gradiente)"
+                            points="100,70 150,100 100,130 50,100"
+                          ></polygon>
+                          <defs>
+                            <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente">
+                              <stop style={{ stopColor: '#1e2026', stopOpacity: 1 }} offset="20%"></stop>
+                              <stop style={{ stopColor: '#414750', stopOpacity: 1 }} offset="60%"></stop>
+                            </linearGradient>
+                          </defs>
+                          <polygon
+                            transform="translate(20, 31)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#227f8b"
+                            points="80,50 80,75 80,99 40,75"
+                          ></polygon>
+                          <polygon
+                            transform="translate(20, 31)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="url(#gradiente2)"
+                            points="40,-40 80,-40 80,99 40,75"
+                          ></polygon>
+                          <defs>
+                            <linearGradient y2="100%" x2="0%" y1="-17%" x1="10%" id="gradiente2">
+                              <stop style={{ stopColor: '#1f474400', stopOpacity: 1 }} offset="20%"></stop>
+                              <stop
+                                className="loader-animatedStop"
+                                style={{ stopColor: '#10c6d354', stopOpacity: 1 }}
+                                offset="100%"
+                              ></stop>
+                            </linearGradient>
+                          </defs>
+                          <polygon
+                            transform="rotate(180 100 100) translate(20, 20)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#17afbd"
+                            points="80,50 80,75 80,99 40,75"
+                          ></polygon>
+                          <polygon
+                            transform="rotate(0 100 100) translate(60, 20)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="url(#gradiente3)"
+                            points="40,-40 80,-40 80,85 40,110.2"
+                          ></polygon>
+                          <defs>
+                            <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente3">
+                              <stop style={{ stopColor: '#10ccd300', stopOpacity: 1 }} offset="20%"></stop>
+                              <stop
+                                className="loader-animatedStop"
+                                style={{ stopColor: '#d3a51054', stopOpacity: 1 }}
+                                offset="100%"
+                              ></stop>
+                            </linearGradient>
+                          </defs>
+                          <polygon
+                            transform="rotate(45 100 100) translate(80, 95)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#ffffff"
+                            points="5,0 5,5 0,5 0,0"
+                            className="loader-particles"
+                          ></polygon>
+                          <polygon
+                            transform="rotate(45 100 100) translate(80, 55)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#17afbd"
+                            points="6,0 6,6 0,6 0,0"
+                            className="loader-particles"
+                          ></polygon>
+                          <polygon
+                            transform="rotate(45 100 100) translate(70, 80)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#17afbd"
+                            points="2,0 2,2 0,2 0,0"
+                            className="loader-particles"
+                          ></polygon>
+                          <polygon
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#292d34"
+                            points="29.5,99.8 100,142 100,172 29.5,130"
+                          ></polygon>
+                          <polygon
+                            transform="translate(50, 92)"
+                            strokeWidth="2"
+                            stroke=""
+                            fill="#1f2127"
+                            points="50,50 120.5,8 120.5,35 50,80"
+                          ></polygon>
+                        </g>
                       </svg>
-
-                      <div className="pixo-loader">
-                        {/* P */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
-                          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gp)"
-                            d="M 10,60 V 4 H 42 C 57,4 57,30 42,30 H 10"
-                            className="pixo-dash" pathLength="360"></path>
-                        </svg>
-
-                        {/* I */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
-                          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gi)"
-                            d="M 16,4 H 48 M 32,4 V 60 M 16,60 H 48"
-                            className="pixo-dash" pathLength="360"></path>
-                        </svg>
-
-                        {/* X */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
-                          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#gx)"
-                            d="M 10,4 L 54,60 M 54,4 L 10,60"
-                            className="pixo-dash" pathLength="360"></path>
-                        </svg>
-
-                        {/* O */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" className="w-14 h-14 md:w-28 md:h-28">
-                          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#go)"
-                            d="M 32 32 m 0 -27 a 27 27 0 1 1 0 54 a 27 27 0 1 1 0 -54"
-                            className="pixo-spin" pathLength="360"></path>
-                        </svg>
-                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <h3 className="font-['Orbitron'] text-xs md:text-sm font-bold tracking-tight">{t.genTitle}</h3>
+                    <div className="space-y-2 max-w-md mx-auto">
+                      <h3 className="font-['Orbitron'] text-xs md:text-sm font-bold tracking-tight bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]">{t.cookingText}</h3>
                       <p className="text-[#6b7a8d] text-xs md:text-sm max-w-sm mx-auto leading-relaxed">
                         {selectedStyle?.isSolo 
                           ? (appLanguage === 'English' ? 'Our AI is crafting your custom poster' : appLanguage === 'Russian' ? 'Наш ИИ готовит ваш уникальный постер' : 'Bizning AI siz uchun maxsus poster yaratmoqda')
@@ -1895,45 +2099,65 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         </button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                        {userPosters.map((poster) => (
-                          <div key={poster.id} className="glow-box p-3 md:p-4 rounded-2xl md:rounded-3xl space-y-3 md:space-y-4 shadow-xl">
-                            <div className="flex justify-between items-center px-2">
-                              <div>
-                                <h4 className="font-bold">{poster.productName}</h4>
-                                <p className="text-xs text-[#6b7a8d]">{poster.promptName} • {poster.createdAt?.toDate ? poster.createdAt.toDate().toLocaleDateString() : 'Recent'}</p>
-                              </div>
-                              <button
-                                onClick={() => deletePoster(poster.id!)}
-                                className="p-2 text-[#6b7a8d] hover:text-[#ff7b72] hover:bg-[#ff7b72]/10 rounded-lg transition-colors"
-                                title={t.delete}
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              {poster.tiles.map((tile, i) => (
-                                <div key={i} className="group relative aspect-square glow-box-sm rounded-xl overflow-hidden border border-[#dde3ea] dark:border-white/20/40">
-                                  <img src={tile} alt={`Tile ${i}`} className="w-full h-full object-cover" />
-                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                                    <button
-                                      onClick={() => setPreviewImage(tile)}
-                                      className="glow-box-sm text-[#1a2030] px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
-                                    >
-                                      {t.preview}
-                                    </button>
-                                    <button
-                                      onClick={() => downloadTile(tile, i)}
-                                      className="glow-box-sm text-[#1a2030] px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
-                                    >
-                                      {t.download}
-                                    </button>
-                                  </div>
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                          {userPosters.map((poster) => (
+                            <div key={poster.id} className="glow-box p-3 md:p-4 rounded-2xl md:rounded-3xl space-y-3 md:space-y-4 shadow-xl">
+                              <div className="flex justify-between items-center px-2">
+                                <div>
+                                  <h4 className="font-bold">{poster.productName}</h4>
+                                  <p className="text-xs text-[#6b7a8d]">{poster.promptName} • {poster.createdAt?.toDate ? poster.createdAt.toDate().toLocaleDateString() : 'Recent'}</p>
                                 </div>
-                              ))}
+                                <button
+                                  onClick={() => deletePoster(poster.id!)}
+                                  className="p-2 text-[#6b7a8d] hover:text-[#ff7b72] hover:bg-[#ff7b72]/10 rounded-lg transition-colors"
+                                  title={t.delete}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                {poster.tiles.map((tile, i) => (
+                                  <div key={i} className="group relative aspect-square glow-box-sm rounded-xl overflow-hidden border border-[#dde3ea] dark:border-white/20/40">
+                                    <img src={tile} alt={`Tile ${i}`} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                      <button
+                                        onClick={() => setPreviewImage(tile)}
+                                        className="glow-box-sm text-[#1a2030] px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
+                                      >
+                                        {t.preview}
+                                      </button>
+                                      <button
+                                        onClick={() => downloadTile(tile, i)}
+                                        className="glow-box-sm text-[#1a2030] px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
+                                      >
+                                        {t.download}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                        {hasMorePosters && (
+                          <div className="flex justify-center mt-6">
+                            <button
+                              onClick={fetchNextPagePosters}
+                              disabled={isLoadingPosters}
+                              className="glow-box-sm text-[#1a2030] px-6 py-2.5 rounded-xl text-sm border border-[#dde3ea] dark:border-white/20/40 hover:border-[#4fc3f7] transition-all flex items-center gap-2"
+                            >
+                              {isLoadingPosters ? (
+                                <>
+                                  <Loader2 size={16} className="animate-spin text-[#1a7aad]" />
+                                  <span>Loading...</span>
+                                </>
+                              ) : (
+                                <span>Load More</span>
+                              )}
+                            </button>
                           </div>
-                        ))}
+                        )}
                       </div>
                     )}
                   </motion.div>
@@ -2183,8 +2407,8 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
                 <div className="col-span-2 md:col-span-1">
                   <div className="flex items-center gap-2 mb-3">
-                    <img src="/logo.png" alt="Pixo AI" className="h-7 object-contain" />
-                    <span className="font-['Orbitron'] text-base font-extrabold tracking-tighter text-white">Pixo AI</span>
+                    <img src="/logo.png" alt="Nidu AI" className="h-7 object-contain" />
+                    <span className="font-['Orbitron'] text-base font-extrabold tracking-tighter text-white">Nidu AI</span>
                   </div>
                   <p className="text-sm leading-relaxed">{t.footerTagline}</p>
                 </div>
@@ -2235,7 +2459,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 </div>
               </div>
               <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-                <span>© {new Date().getFullYear()} Pixo AI. {t.footerRights}</span>
+                <span>© {new Date().getFullYear()} Nidu AI. {t.footerRights}</span>
                 <div className="flex items-center gap-1">
                   {(['English', 'Russian', 'Uzbek'] as const).map(lang => (
                     <button
@@ -2575,7 +2799,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 {appLanguage === 'English' ? (
                   <>
                     <p className="font-bold text-[#1a2030] dark:text-white">1. Agreement to Terms</p>
-                    <p>By accessing Pixo AI, you agree to comply with and be bound by these Terms of Service. If you do not agree, you are prohibited from using the generation services.</p>
+                    <p>By accessing Nidu AI, you agree to comply with and be bound by these Terms of Service. If you do not agree, you are prohibited from using the generation services.</p>
                     
                     <p className="font-bold text-[#1a2030] dark:text-white">2. Credit & Payment System</p>
                     <p>Generation requests consume internal Credits. Credits are purchased via manual transaction through Telegram. All credit consumptions for poster generation tasks are final and non-refundable.</p>
@@ -2584,12 +2808,12 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <p>You agree not to upload any illegal, adult, copyrighted, or offensive material for poster creation. We reserve the right to suspend accounts displaying abusive behavior.</p>
                     
                     <p className="font-bold text-[#1a2030] dark:text-white">4. Ownership of Generated Content</p>
-                    <p>You retain full copyright and commercial usage rights over the poster designs created using the Pixo AI generator, subject to complete credit payments.</p>
+                    <p>You retain full copyright and commercial usage rights over the poster designs created using the Nidu AI generator, subject to complete credit payments.</p>
                   </>
                 ) : appLanguage === 'Russian' ? (
                   <>
                     <p className="font-bold text-[#1a2030] dark:text-white">1. Согласие с условиями</p>
-                    <p>Используя Pixo AI, вы соглашаетесь соблюдать настоящие Условия использования. Если вы не согласны с условиями, использование сервиса генерации запрещено.</p>
+                    <p>Используя Nidu AI, вы соглашаетесь соблюдать настоящие Условия использования. Если вы не согласны с условиями, использование сервиса генерации запрещено.</p>
                     
                     <p className="font-bold text-[#1a2030] dark:text-white">2. Система кредитов и платежи</p>
                     <p>Для создания постеров используются внутренние кредиты. Покупка кредитов осуществляется через поддержку Telegram. Списанные за генерацию кредиты возврату не подлежат.</p>
@@ -2598,12 +2822,12 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <p>Запрещается загружать незаконный контент, порнографию, материалы, защищенные чужим авторским правом, или агрессивный медиаконтент. Мы оставляем за собой право блокировать нарушителей.</p>
                     
                     <p className="font-bold text-[#1a2030] dark:text-white">4. Права на сгенерированный контент</p>
-                    <p>Вы владеете всеми коммерческими правами на сгенерированные вами рекламные материалы и постеры, созданные в сервисе Pixo AI.</p>
+                    <p>Вы владеете всеми коммерческими правами на сгенерированные вами рекламные материалы и постеры, созданные в сервисе Nidu AI.</p>
                   </>
                 ) : (
                   <>
                     <p className="font-bold text-[#1a2030] dark:text-white">1. Shartlarga rozilik</p>
-                    <p>Pixo AI xizmatidan foydalanish orqali siz ushbu Foydalanish shartlariga to'liq rozilik bildirasiz. Shartlarga rozi bo'lmasangiz, saytdan foydalanish tavsiya etilmaydi.</p>
+                    <p>Nidu AI xizmatidan foydalanish orqali siz ushbu Foydalanish shartlariga to'liq rozilik bildirasiz. Shartlarga rozi bo'lmasangiz, saytdan foydalanish tavsiya etilmaydi.</p>
                     
                     <p className="font-bold text-[#1a2030] dark:text-white">2. Kreditlar va to'lovlar</p>
                     <p>Posterlar yaratish uchun ichki kreditlardan foydalaniladi. Kreditlar Telegram yordam xizmati orqali sotib olinadi. Generatsiya uchun sarflangan kreditlar qaytarib berilmaydi.</p>
@@ -2612,7 +2836,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <p>Tizimga noqonuniy, mualliflik huquqi buzilgan, behayo yoki haqoratli rasmlarni yuklash taqiqlanadi. Qoidalarni buzgan foydalanuvchilar bloklanishi mumkin.</p>
                     
                     <p className="font-bold text-[#1a2030] dark:text-white">4. Mualliflik huquqi</p>
-                    <p>Pixo AI generatori orqali yaratilgan barcha tayyor posterlar va tijoriy vizuallarga bo'lgan to'liq mualliflik huquqlari sizda qoladi.</p>
+                    <p>Nidu AI generatori orqali yaratilgan barcha tayyor posterlar va tijoriy vizuallarga bo'lgan to'liq mualliflik huquqlari sizda qoladi.</p>
                   </>
                 )}
               </div>

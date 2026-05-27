@@ -1366,55 +1366,64 @@ body {
   }
 }
 
-/* Custom PIXO Loader Animation */
-.pixo-loader-wrap {
+/* Custom 3D Magic Geometric Loader Animation */
+.nidu-loader-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 180px;
+  min-height: 250px;
   width: 100%;
 }
-.pixo-loader {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-@media (min-width: 768px) {
-  .pixo-loader {
-    gap: 16px;
+@keyframes loader-bounce {
+  0%,
+  100% {
+    translate: 0px 36px;
+  }
+  50% {
+    translate: 0px 46px;
   }
 }
-.pixo-loader svg {
-  position: static !important; /* overrides standard .loader svg positioning absolute */
+@keyframes loader-bounce2 {
+  0%,
+  100% {
+    translate: 0px 46px;
+  }
+  50% {
+    translate: 0px 56px;
+  }
 }
-.pixo-dash {
-  animation: dashArray 2s ease-in-out infinite, dashOffset 2s linear infinite;
+@keyframes loader-umbral {
+  0% {
+    stop-color: #10bcd32e;
+  }
+  50% {
+    stop-color: #2fcad8;
+  }
+  100% {
+    stop-color: #10d3982e;
+  }
 }
-.pixo-spin {
-  animation: spinDashArray 2s ease-in-out infinite, spin 8s ease-in-out infinite, dashOffset 2s linear infinite;
-  transform-origin: center;
+@keyframes loader-particles {
+  0%,
+  100% {
+    translate: 0px 16px;
+  }
+  50% {
+    translate: 0px 6px;
+  }
 }
-@keyframes dashArray {
-  0%   { stroke-dasharray: 0 1 359 0; }
-  50%  { stroke-dasharray: 0 359 1 0; }
-  100% { stroke-dasharray: 359 1 0 0; }
+.loader-particles {
+  animation: loader-particles 4s ease-in-out infinite;
 }
-@keyframes spinDashArray {
-  0%   { stroke-dasharray: 270 90; }
-  50%  { stroke-dasharray: 0 360; }
-  100% { stroke-dasharray: 270 90; }
+.loader-animatedStop {
+  animation: loader-umbral 4s infinite;
 }
-@keyframes dashOffset {
-  0%   { stroke-dashoffset: 365; }
-  100% { stroke-dashoffset: 5; }
+.loader-bounce {
+  animation: loader-bounce 4s ease-in-out infinite;
+  translate: 0px 36px;
 }
-@keyframes spin {
-  0%          { rotate: 0deg; }
-  12.5%, 25%  { rotate: 270deg; }
-  37.5%, 50%  { rotate: 540deg; }
-  62.5%, 75%  { rotate: 810deg; }
-  87.5%, 100% { rotate: 1080deg; }
+.loader-bounce2 {
+  animation: loader-bounce2 4s ease-in-out infinite;
+  translate: 0px 46px;
+  animation-delay: 0.5s;
 }
