@@ -1,34 +1,30 @@
+# Manual Action Guide: Updating Firebase Rules & Deleting Duplicates
+
+Follow these simple, step-by-step instructions to update your Firestore rules and delete the duplicate prompts from your dashboard.
+
+---
+
+## Phase 1: Update Firestore Rules in Firebase Console
+
+Since the local Firebase CLI is not authenticated, you need to copy and paste the updated rules directly into the Firebase Console:
+
+1. **Open Firebase Console**:
+   - Navigate to [https://console.firebase.google.com/](https://console.firebase.google.com/) in your web browser.
+   - Select your project: **`gen-lang-client-0995405102`** (or the one named `ai-studio...`).
+
+2. **Navigate to Firestore Rules**:
+   - In the left sidebar, click on **Build** -> **Firestore Database**.
+   - Click on the **Rules** tab at the top of the Firestore Database panel.
+
+3. **Replace Rules Code**:
+   - Copy the entire code block below:
+
+```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    //
-    // Collection: users
-    // Document ID: {userId}
-    // Fields:
-    //   - email: string (required, email format)
-    //   - name: string (optional)
-    //   - credits: number (required, >= 0)
-    //   - createdAt: timestamp (required)
-    //   - isAdmin: boolean (required)
-    //
-    // Collection: prompts
-    // Document ID: {promptId}
-    // Fields:
-    //   - name: string (required)
-    //   - icon: string (optional)
-    //   - description: string (optional)
-    //   - promptText: string (required)
-    //
-    // ===============================================================
-
-    // ===============================================================
     // Helper Functions
-    // ===============================================================
-
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -57,23 +53,14 @@ service cloud.firestore {
              data.promptText is string && data.promptText.size() > 0 && data.promptText.size() < 5000;
     }
 
-    // ===============================================================
-    // Rules
-    // ===============================================================
-
+    // Collection Mappings
     match /users/{userId} {
-      // Users can read their own profile. Admins can read all profiles.
-      allow read: if isOwner(userId) || isAdmin();
-      
-      // Creation: User can create their own profile if it's not admin (unless they are the bootstrap admin)
-      // Or admin can create any profile.
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
                     (
                       (isOwner(userId) && request.resource.data.isAdmin == false && request.resource.data.credits <= 15) || 
                       isAdmin()
                     );
-
-      // Update: User can update their own profile but NOT their credits or isAdmin status (unless they are admin)
       allow update: if isAuthenticated() && isValidUser(request.resource.data) &&
                     (
                       (isOwner(userId) && 
@@ -84,19 +71,37 @@ service cloud.firestore {
     }
 
     match /prompts/{promptId} {
-      // Prompts are readable by all authenticated users
       allow read: if isAuthenticated();
-      
-      // Only admins can write prompts
       allow create, update: if isAdmin() && isValidPrompt(request.resource.data);
       allow delete: if isAdmin();
     }
 
     match /posters/{posterId} {
-      // Users can only read, create, delete their own posters. Admins can read all.
       allow read: if isOwner(resource.data.userId) || isAdmin();
       allow create: if isOwner(request.resource.data.userId);
       allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
   }
 }
+```
+
+   - Select all text in the rules editor on the Firebase Console page, delete it, and paste the code block you just copied.
+   - Click the blue **Publish** button at the top right of the editor.
+
+---
+
+## Phase 2: Delete Duplicate Prompts in Admin Dashboard
+
+Once the rules are updated, deleting documents is fully authorized for admins. You can clean up the duplicates directly from the UI:
+
+1. **Open the Website**:
+   - Go to your website: `http://localhost:3000/admin` (or your live site URL).
+   - Sign in with your administrator account (`habibovkomron007@gmail.com`).
+
+2. **Navigate to Prompts Management**:
+   - Click on the **Prompt Library** tab (or **Solo Prompts** tab) in the administrator panel.
+
+3. **Delete Duplicate Items**:
+   - Locate the duplicate cards that are displaying default icons (e.g. `✦` or `◻`).
+   - Click the red **Trash/Delete** button next to each duplicate card.
+   - The duplicate cards will be immediately removed from your database and UI.

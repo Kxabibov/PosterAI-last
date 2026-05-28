@@ -135,7 +135,7 @@ const Toast = ({ message, type, onClose }: ToastProps) => (
     <span className={type === 'success' ? 'text-[#1a7aad]' : type === 'error' ? 'text-[#ff7b72]' : 'text-[#dde3ea]'}>
       {type === 'success' ? <CheckCircle2 size={18} /> : type === 'error' ? <X size={18} /> : <Zap size={18} />}
     </span>
-    <span className="text-sm text-[#1a2030]">{message}</span>
+    <span className="text-sm text-[#1a2030] dark:text-white">{message}</span>
   </motion.div>
 );
 
@@ -239,6 +239,7 @@ export default function App() {
   const [flowStep, setFlowStep] = useState<FlowStep>(0);
   const [toasts, setToasts] = useState<{ id: number, message: string, type: 'success' | 'error' | 'info' }[]>([]);
   const [prompts, setPrompts] = useState<PromptTemplate[]>([]);
+  const didSeedRef = useRef(false);
 
   // Flow State
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -744,7 +745,7 @@ export default function App() {
   }, [user]);
 
   useEffect(() => {
-    if (user && prompts.length === 0) {
+    if (user && prompts.length === 0 && !didSeedRef.current) {
       const seedDefaults = async () => {
         const ABSTRACT_PROMPT = `Scene Composition:
 Create a single 2x2 grid image (4 images in one frame) in ultra-realistic 2K resolution (2048x2048). The overall mood is modern, elegant, and minimalist, designed for a luxury e-commerce landing page. Each of the four cards features a central title at the top in a sophisticated, wide-set sans-serif font displaying the [PRODUCT NAME].
@@ -807,7 +808,8 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
       // Only seed if we are sure it's empty after initial load
       const timeout = setTimeout(() => {
-        if (prompts.length === 0 && profile?.isAdmin) {
+        if (prompts.length === 0 && profile?.isAdmin && !didSeedRef.current) {
+          didSeedRef.current = true;
           seedDefaults();
         }
       }, 3000);
@@ -1806,10 +1808,10 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                               )}
                             </div>
                             <div className="text-center w-full px-1">
-                               <span className={`font-['Orbitron'] font-bold text-sm md:text-base transition-colors ${selectedStyle?.id === p.id ? 'text-[#1a7aad]' : 'text-[#1a2030]'}`}>
+                               <span className={`font-['Orbitron'] font-bold text-sm md:text-base transition-colors ${selectedStyle?.id === p.id ? 'text-[#1a7aad]' : 'text-[#1a2030] dark:text-white'}`}>
                                  {p.name}
                                </span>
-                               <p className="text-[10px] text-[#6b7a8d] line-clamp-1 mt-0.5">{p.description}</p>
+                               <p className="text-[10px] text-[#6b7a8d] dark:text-[#a0aec0] line-clamp-1 mt-0.5">{p.description}</p>
                             </div>
                           </button>
                         ))}

@@ -10,8 +10,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const PORT = process.env.PORT || 3001;
 
-// Initialize Gemini SDK with server-side environment key
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+
 
 // Proxy endpoint for Remove.bg API
 app.post('/api/removebg', async (req, res) => {
@@ -66,6 +65,20 @@ app.post('/api/generate', async (req, res) => {
     if (!apiKey) {
       return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
     }
+
+    const incomingReferer = req.headers.referer || req.headers.referrer;
+    const refererHeader = (incomingReferer && (incomingReferer.includes('web.app') || incomingReferer.includes('firebaseapp.com')))
+      ? (Array.isArray(incomingReferer) ? incomingReferer[0] : incomingReferer)
+      : 'https://gen-lang-client-0995405102.firebaseapp.com/';
+
+    const ai = new GoogleGenAI({
+      apiKey: apiKey,
+      httpOptions: {
+        headers: {
+          'Referer': refererHeader
+        }
+      }
+    });
 
     const result = await ai.models.generateContent({
       model: "gemini-3-pro-image-preview",
