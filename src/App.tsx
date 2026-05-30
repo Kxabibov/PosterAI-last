@@ -58,7 +58,6 @@ import { UserProfile, PromptTemplate, FlowStep, UserPoster } from './types';
 import { handleFirestoreError, OperationType } from './lib/firestoreUtils';
 
 // Constants
-const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 const ADMIN_EMAILS = ["habibovkomron007@gmail.com"];
 const CREDITS_PER_GEN = 10;
 
@@ -907,7 +906,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
         reader.readAsDataURL(file);
       });
 
-      const res = await fetch(`${API_BASE}/api/removebg`, {
+      const res = await fetch('/api/removebg', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image_b64: base64Image })
@@ -1026,7 +1025,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       });
 
       setGenStep(2);
-      const res = await fetch(`${API_BASE}/api/generate`, {
+      const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1612,45 +1611,22 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     exit={{ opacity: 0, y: -20 }}
                     className="text-center py-2 md:py-6"
                   >
-                    <h1 className="font-['Orbitron'] text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none flex flex-col justify-center items-center box-border w-full">
+                    <h1 className="font-['Orbitron'] text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none min-h-[110px] sm:min-h-[130px] md:min-h-[160px] flex flex-col justify-center items-center">
                       {appLanguage === 'English' ? (
-                        <>
-                          <span className="block h-[80px] sm:h-[55px] md:h-[65px] flex items-center justify-center box-border w-full text-center">
-                            Product card created
-                          </span>
-                          <span className="block h-[80px] sm:h-[65px] md:h-[75px] flex items-center justify-center box-border w-full text-center relative">
-                            before your&nbsp;
-                            <TypewriterCycle 
-                              phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
-                              className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
-                            />
-                          </span>
-                        </>
+                        <>Product card created<br />before your <TypewriterCycle 
+                          phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
+                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                        /></>
                       ) : appLanguage === 'Russian' ? (
-                        <>
-                          <span className="block h-[80px] sm:h-[55px] md:h-[65px] flex items-center justify-center box-border w-full text-center">
-                            Карточка товара будет готова
-                          </span>
-                          <span className="block h-[80px] sm:h-[65px] md:h-[75px] flex items-center justify-center box-border w-full text-center relative">
-                            быстрее, чем&nbsp;
-                            <TypewriterCycle 
-                              phrases={['остынет кофе', 'ответит дизайнер', 'начнется созвон', 'загрузится страница']} 
-                              className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
-                            />
-                          </span>
-                        </>
+                        <>Карточка товара будет готова<br />быстрее, чем <TypewriterCycle 
+                          phrases={['остынет кофе', 'ответит дизайнер', 'начнется созвон', 'загрузится страница']} 
+                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                        /></>
                       ) : (
-                        <>
-                          <span className="block h-[80px] sm:h-[55px] md:h-[65px] flex items-center justify-center box-border w-full text-center">
-                            Mahsulot kartasi tayyor bo'ladi,
-                          </span>
-                          <span className="block h-[80px] sm:h-[65px] md:h-[75px] flex items-center justify-center box-border w-full text-center relative">
-                            <TypewriterCycle 
-                              phrases={['qahva soviguncha', 'dizayner javob berguncha', 'majlis boshlanguncha']} 
-                              className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
-                            />
-                          </span>
-                        </>
+                        <>Mahsulot kartasi tayyor bo'ladi,<br /><TypewriterCycle 
+                          phrases={['qahva soviguncha', 'dizayner javob berguncha', 'majlis boshlanguncha']} 
+                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                        /></>
                       )}
                     </h1>
                     <div className="flex flex-col items-center gap-4">
