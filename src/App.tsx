@@ -58,6 +58,7 @@ import { UserProfile, PromptTemplate, FlowStep, UserPoster } from './types';
 import { handleFirestoreError, OperationType } from './lib/firestoreUtils';
 
 // Constants
+const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 const ADMIN_EMAILS = ["habibovkomron007@gmail.com"];
 const CREDITS_PER_GEN = 10;
 
@@ -344,6 +345,9 @@ export default function App() {
       createAnother: "Create Another",
       pricingTitle: "Pricing Plans",
       pricingDesc: "Choose the best plan for your creative needs",
+      planBasicImages: "5 creations (4 images) or 10 solo styles",
+      planStandardImages: "15 creations (4 images) or 30 solo styles",
+      planPremiumImages: "30 creations (4 images) or 60 solo styles",
       mostPopular: "Most Popular",
       contactTelegram: "Contact",
       manualPayment: "Payments are processed manually via Telegram. Credits will be added to your account instantly after confirmation.",
@@ -456,6 +460,9 @@ export default function App() {
       createAnother: "Создать еще",
       pricingTitle: "Тарифные планы",
       pricingDesc: "Выберите подходящий тариф для ваших идей",
+      planBasicImages: "5 генераций (по 4 фото) или 10 соло-стилей",
+      planStandardImages: "15 генераций (по 4 фото) или 30 соло-стилей",
+      planPremiumImages: "30 генераций (по 4 фото) или 60 соло-стилей",
       mostPopular: "Популярный",
       contactTelegram: "Связаться",
       manualPayment: "Оплата обрабатывается вручную через Telegram. Кредиты будут зачислены сразу после подтверждения.",
@@ -560,6 +567,9 @@ export default function App() {
       createAnother: "Yana yaratish",
       pricingTitle: "Tariflar",
       pricingDesc: "Ijodiy ehtiyojlaringiz uchun eng yaxshi rejani tanlang",
+      planBasicImages: "5 marta yaratish (4 rasmli) yoki 10 ta solo uslub",
+      planStandardImages: "15 marta yaratish (4 rasmli) yoki 30 ta solo uslub",
+      planPremiumImages: "30 marta yaratish (4 rasmli) yoki 60 ta solo uslub",
       mostPopular: "Eng ommabop",
       contactTelegram: "Bog'lanish",
       manualPayment: "To'lovlar Telegram orqali qo'lda amalga oshiriladi. Tasdiqlangandan so'ng kreditlar darhol hisobingizga qo'shiladi.",
@@ -897,7 +907,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
         reader.readAsDataURL(file);
       });
 
-      const res = await fetch('/api/removebg', {
+      const res = await fetch(`${API_BASE}/api/removebg`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image_b64: base64Image })
@@ -1016,7 +1026,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       });
 
       setGenStep(2);
-      const res = await fetch('/api/generate', {
+      const res = await fetch(`${API_BASE}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1602,22 +1612,45 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     exit={{ opacity: 0, y: -20 }}
                     className="text-center py-2 md:py-6"
                   >
-                    <h1 className="font-['Orbitron'] text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none min-h-[110px] sm:min-h-[130px] md:min-h-[160px] flex flex-col justify-center items-center">
+                    <h1 className="font-['Orbitron'] text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none flex flex-col justify-center items-center box-border w-full">
                       {appLanguage === 'English' ? (
-                        <>Product card created<br />before your <TypewriterCycle 
-                          phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
-                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
-                        /></>
+                        <>
+                          <span className="block h-[80px] sm:h-[55px] md:h-[65px] flex items-center justify-center box-border w-full text-center">
+                            Product card created
+                          </span>
+                          <span className="block h-[80px] sm:h-[65px] md:h-[75px] flex items-center justify-center box-border w-full text-center relative">
+                            before your&nbsp;
+                            <TypewriterCycle 
+                              phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
+                              className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                            />
+                          </span>
+                        </>
                       ) : appLanguage === 'Russian' ? (
-                        <>Карточка товара будет готова<br />быстрее, чем <TypewriterCycle 
-                          phrases={['остынет кофе', 'ответит дизайнер', 'начнется созвон', 'загрузится страница']} 
-                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
-                        /></>
+                        <>
+                          <span className="block h-[80px] sm:h-[55px] md:h-[65px] flex items-center justify-center box-border w-full text-center">
+                            Карточка товара будет готова
+                          </span>
+                          <span className="block h-[80px] sm:h-[65px] md:h-[75px] flex items-center justify-center box-border w-full text-center relative">
+                            быстрее, чем&nbsp;
+                            <TypewriterCycle 
+                              phrases={['остынет кофе', 'ответит дизайнер', 'начнется созвон', 'загрузится страница']} 
+                              className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                            />
+                          </span>
+                        </>
                       ) : (
-                        <>Mahsulot kartasi tayyor bo'ladi,<br /><TypewriterCycle 
-                          phrases={['qahva soviguncha', 'dizayner javob berguncha', 'majlis boshlanguncha']} 
-                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
-                        /></>
+                        <>
+                          <span className="block h-[80px] sm:h-[55px] md:h-[65px] flex items-center justify-center box-border w-full text-center">
+                            Mahsulot kartasi tayyor bo'ladi,
+                          </span>
+                          <span className="block h-[80px] sm:h-[65px] md:h-[75px] flex items-center justify-center box-border w-full text-center relative">
+                            <TypewriterCycle 
+                              phrases={['qahva soviguncha', 'dizayner javob berguncha', 'majlis boshlanguncha']} 
+                              className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                            />
+                          </span>
+                        </>
                       )}
                     </h1>
                     <div className="flex flex-col items-center gap-4">
@@ -2337,6 +2370,11 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           <div className="flex items-center gap-3 text-sm"><CheckCircle2 size={14} className="text-[#4fc3f7]" /><span className="text-white font-bold">{plan.credits} {t.credits}</span></div>
                           <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>AI Poster Generation</span></div>
                           <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>Background Removal</span></div>
+                          <div className="text-xs text-[#4fc3f7] font-semibold border-t border-white/10 pt-3 mt-1 pl-1">
+                            <span>
+                              ℹ️ {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
+                            </span>
+                          </div>
                         </div>
                         <a href={"https://t.me/kxabibov?text=Hello! I want to buy the "+plan.name+" plan ("+plan.credits+" credits) for "+plan.price+" UZS."} target="_blank" rel="noreferrer" className="pricing-cta-btn">
                           <div className="pricing-cta-blob-violet"></div>
@@ -2631,13 +2669,13 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { name: 'Basic', price: '50,000', credits: 50, color: '#1a7aad', icon: '🌱' },
-                  { name: 'Standard', price: '150,000', credits: 200, color: '#1a7aad', icon: '🚀', popular: true },
-                  { name: 'Premium', price: '250,000', credits: 400, color: '#d95050', icon: '👑' }
+                  { name: 'Basic', price: '75,000', credits: 50, color: '#1a7aad', icon: '🌱' },
+                  { name: 'Standard', price: '150,000', credits: 150, color: '#1a7aad', icon: '🚀', popular: true },
+                  { name: 'Premium', price: '250,000', credits: 300, color: '#d95050', icon: '👑' }
                 ].map((plan, i) => (
                   <div
                     key={i}
-                    className={`relative glow-box-sm border rounded-[32px] p-6 flex flex-col transition-all hover:scale-[1.02] ${plan.popular ? 'border-[#4fc3f7]/50 shadow-[0_0_40px_rgba(79,195,247,0.15)]' : 'border-[#dde3ea] dark:border-white/20/40'
+                    className={`relative glow-box-sm border rounded-[32px] p-6 flex flex-col transition-all hover:scale-[1.02] ${plan.popular ? 'border-[#4fc3f7]/50 shadow-[0_0_40px_rgba(79,195,247,0.15)]' : 'border-[#dde3ea] dark:border-white/20'
                       }`}
                   >
                     {plan.popular && (
@@ -2657,7 +2695,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         <div className="w-5 h-5 rounded-full bg-[#4fc3f7]/10 flex items-center justify-center">
                           <CheckCircle2 size={12} className="text-[#1a7aad]" />
                         </div>
-                        <span className="font-bold text-[#1a2030]">{plan.credits} {t.credits}</span>
+                        <span className="font-bold text-[#1a2030] dark:text-white">{plan.credits} {t.credits}</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-[#6b7a8d]">
                         <div className="w-5 h-5 rounded-full bg-[#4fc3f7]/10 flex items-center justify-center">
@@ -2670,6 +2708,11 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           <CheckCircle2 size={12} />
                         </div>
                         <span>Background Removal</span>
+                      </div>
+                      <div className="text-xs text-[#1a7aad] dark:text-[#4fc3f7] font-semibold border-t border-[#dde3ea] dark:border-white/10 pt-3 mt-1 pl-1">
+                        <span>
+                          ℹ️ {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
+                        </span>
                       </div>
                     </div>
 

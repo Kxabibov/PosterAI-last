@@ -1179,17 +1179,12 @@ body {
 }
 
 .comparison-divider-vs {
-  background: rgba(79, 195, 247, 0.12);
-  border: 1.5px solid rgba(79, 195, 247, 0.35);
   color: #4fc3f7;
-  padding: 0.75rem 1rem;
-  border-radius: 50%;
   font-size: 0.85rem;
   font-weight: 800;
   font-family: 'Orbitron';
   letter-spacing: 1.5px;
   z-index: 5;
-  box-shadow: 0 0 20px rgba(79,195,247,0.15);
   text-shadow: 0 0 4px rgba(79,195,247,0.4);
 }
 
