@@ -1394,7 +1394,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
         )}
       </AnimatePresence>
 
-      <main className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 py-4 md:py-12">
+      <main className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 pt-4 pb-0 md:pt-12 md:pb-2">
         <AnimatePresence mode="wait">
           {adminTab ? (
             <motion.div
@@ -1609,9 +1609,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="text-center py-2 md:py-6"
+                    className="text-center py-2 md:py-6 relative w-full h-[320px] sm:h-[240px] md:h-[270px] lg:h-[340px] xl:h-[360px]"
                   >
-                    <h1 className="font-['Orbitron'] text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none min-h-[210px] sm:min-h-[150px] md:min-h-[180px] flex flex-col justify-center items-center">
+                    <h1 className="font-['Orbitron'] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-tight select-none flex flex-col justify-center items-center h-[220px] sm:h-[150px] md:h-[180px] lg:h-[210px] xl:h-[230px]">
                       {appLanguage === 'English' ? (
                         <>Product card created<br />before your <TypewriterCycle 
                           phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
@@ -1629,7 +1629,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         /></>
                       )}
                     </h1>
-                    <div className="flex flex-col items-center gap-4">
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-2">
                       <button
                         id="start-creating-btn"
                         onClick={() => {
@@ -1675,8 +1675,8 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     >
                       <div className="absolute -inset-1 bg-gradient-to-br from-[#4fc3f7] to-[#dde3ea] rounded-[32px] opacity-10 group-hover:opacity-25 transition-opacity blur-xl" />
                       <div className="relative glow-box border-2 border-dashed border-[#4fc3f7]/25 rounded-[20px] md:rounded-[32px] p-6 md:p-10 text-center space-y-3 md:space-y-6 group-hover:border-[#4fc3f7]/40 transition-all">
-                        <div className="w-12 h-12 md:w-20 md:h-20 glow-box-sm rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-sm md:text-base group-hover:scale-110 transition-transform">
-                          📦
+                        <div className="w-12 h-12 md:w-20 md:h-20 glow-box-sm rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-sm md:text-base group-hover:scale-110 transition-transform text-[#4fc3f7]">
+                          <Upload size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
                           <h3 className="font-['Orbitron'] text-lg md:text-xl font-bold mb-1">{t.dropImage}</h3>
@@ -2307,7 +2307,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                   ))}
                 </div>
                 <div className="comparison-success-bar"><div className="comparison-success-fill"></div></div>
-                <p className="text-[#4fc3f7]/60 text-xs mt-2 text-center">Workflow efficiency: INSTANT ⚡</p>
+                <p className="text-[#4fc3f7]/60 text-xs mt-2 text-center">Workflow efficiency: INSTANT</p>
               </motion.div>
             </div>
           </section>
@@ -2348,7 +2348,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>Background Removal</span></div>
                           <div className="text-xs text-[#4fc3f7] font-semibold border-t border-white/10 pt-3 mt-1 pl-1">
                             <span>
-                              ℹ️ {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
+                              {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
                             </span>
                           </div>
                         </div>
@@ -2645,9 +2645,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { name: 'Basic', price: '75,000', credits: 50, color: '#1a7aad', icon: '🌱' },
-                  { name: 'Standard', price: '150,000', credits: 150, color: '#1a7aad', icon: '🚀', popular: true },
-                  { name: 'Premium', price: '250,000', credits: 300, color: '#d95050', icon: '👑' }
+                  { name: 'Basic', price: '75,000', credits: 50, color: '#1a7aad', icon: Sparkles, iconClass: 'text-[#4fc3f7]/70' },
+                  { name: 'Standard', price: '150,000', credits: 150, color: '#1a7aad', icon: Zap, iconClass: 'text-yellow-400 animate-pulse', popular: true },
+                  { name: 'Premium', price: '250,000', credits: 300, color: '#d95050', icon: ShieldCheck, iconClass: 'text-green-400' }
                 ].map((plan, i) => (
                   <div
                     key={i}
@@ -2659,7 +2659,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         {t.mostPopular}
                       </div>
                     )}
-                    <div className="text-2xl mb-4">{plan.icon}</div>
+                    <div className="mb-4">
+                      <plan.icon size={32} className={plan.iconClass} />
+                    </div>
                     <h3 className="font-['Orbitron'] text-xl font-bold mb-1">{plan.name}</h3>
                     <div className="flex items-baseline gap-1 mb-6">
                       <span className="text-xl font-bold">{plan.price}</span>
@@ -2687,7 +2689,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       </div>
                       <div className="text-xs text-[#1a7aad] dark:text-[#4fc3f7] font-semibold border-t border-[#dde3ea] dark:border-white/10 pt-3 mt-1 pl-1">
                         <span>
-                          ℹ️ {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
+                          {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
                         </span>
                       </div>
                     </div>
