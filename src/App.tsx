@@ -1611,7 +1611,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     exit={{ opacity: 0, y: -20 }}
                     className="text-center py-2 md:py-6"
                   >
-                    <h1 className="font-['Orbitron'] text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none min-h-[110px] sm:min-h-[130px] md:min-h-[160px] flex flex-col justify-center items-center">
+                    <h1 className="font-['Orbitron'] text-4xl md:text-6xl font-extrabold tracking-tighter mb-4 md:mb-6 leading-tight select-none min-h-[210px] sm:min-h-[150px] md:min-h-[180px] flex flex-col justify-center items-center">
                       {appLanguage === 'English' ? (
                         <>Product card created<br />before your <TypewriterCycle 
                           phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
