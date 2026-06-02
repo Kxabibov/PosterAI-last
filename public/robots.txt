@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-# Sitemap URL (Replace with your actual custom domain if different)
-Sitemap: https://nidu.ai/sitemap.xml
+# Sitemap URL
+Sitemap: https://www.nidu.studio/sitemap.xml
