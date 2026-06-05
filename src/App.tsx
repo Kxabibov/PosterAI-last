@@ -1370,6 +1370,75 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               <a href="#how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors">{t.howItWorksTitle}</a>
               <a href="#examples" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors">{t.exploreExamples}</a>
               <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors">{t.pricingTitle}</a>
+              
+              <div className="border-t border-[#dde3ea]/50 dark:border-white/10 my-1"></div>
+              
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (!user) {
+                    signIn();
+                  } else {
+                    setFlowStep(6);
+                    setAdminTab(null);
+                  }
+                }}
+                className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors flex items-center gap-2"
+              >
+                <LayoutDashboard size={14} className="text-[#1a7aad]" />
+                {t.myInventory}
+              </button>
+
+              {user && ADMIN_EMAILS.includes(user.email || '') && (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setAdminTab(adminTab === 'soloPrompts' ? null : 'soloPrompts');
+                      setFlowStep(0);
+                    }}
+                    className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors flex items-center gap-2"
+                  >
+                    <Sparkles size={14} className="text-[#1a7aad]" />
+                    {appLanguage === 'English' ? 'Solo Prompts' : appLanguage === 'Russian' ? 'Соло промпты' : 'Yakka prompstlar'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setAdminTab(adminTab === 'users' ? null : 'users');
+                      setFlowStep(0);
+                    }}
+                    className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors flex items-center gap-2"
+                  >
+                    <ShieldCheck size={14} className="text-[#1a7aad]" />
+                    {adminTab === 'users' ? t.exitAdmin : t.admin}
+                  </button>
+                </>
+              )}
+
+              {user ? (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    signOut();
+                  }}
+                  className="text-left font-['Orbitron'] text-xs font-bold text-red-500 hover:text-red-600 transition-colors flex items-center gap-2 mt-1"
+                >
+                  <LogOut size={14} />
+                  {appLanguage === 'English' ? 'Sign Out' : appLanguage === 'Russian' ? 'Выйти' : 'Chiqish'}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    signIn();
+                  }}
+                  className="text-left font-['Orbitron'] text-xs font-bold text-[#1a7aad] hover:text-[#4fc3f7] transition-colors flex items-center gap-2 mt-1"
+                >
+                  <LogOut size={14} className="rotate-180" />
+                  {appLanguage === 'English' ? 'Sign In' : appLanguage === 'Russian' ? 'Войти' : 'Kirish'}
+                </button>
+              )}
             </div>
             
             <div className="pt-2 border-t border-[#dde3ea]/50 dark:border-white/10">
