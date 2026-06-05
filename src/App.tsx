@@ -1580,7 +1580,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                               {p.imageUrl ? (
                                 <img src={p.imageUrl} alt={p.name} className="w-12 h-12 rounded-lg object-cover border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30" />
                               ) : (
-                                <span className="text-lg w-12 h-12 flex items-center justify-center glow-box-sm rounded-lg border border-[#dde3ea] dark:border-white/20/40">{p.icon}</span>
+                                <span className="text-lg w-12 h-12 flex items-center justify-center glow-box-sm rounded-lg border border-[#dde3ea] dark:border-white/20">{p.icon}</span>
                               )}
                               <div>
                                 <div className="font-bold">{p.name}</div>
@@ -1621,7 +1621,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               className="max-w-3xl mx-auto"
             >
               {/* Back Button and Step Indicator */}
-              {flowStep > 0 && (
+              {flowStep > 0 && flowStep < 5 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 sm:mb-12">
                   {/* Back Button */}
                   {flowStep !== 4 && (
@@ -1761,7 +1761,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); document.getElementById('camera-input')?.click(); }}
-                            className="glow-box-sm text-[#1a2030] px-4 py-2.5 md:px-6 md:py-3 rounded-xl font-bold text-xs md:text-sm border border-[#dde3ea] dark:border-white/20/40 flex items-center justify-center gap-2"
+                            className="glow-box-sm text-[#1a2030] dark:text-white px-4 py-2.5 md:px-6 md:py-3 rounded-xl font-bold text-xs md:text-sm border border-[#dde3ea] dark:border-white/20 flex items-center justify-center gap-2"
                           >
                             <Camera size={14} className="md:w-4 md:h-4" />
                             {t.useCamera}
@@ -2146,7 +2146,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           setProcessedImage(null);
                           setGeneratedTiles([]);
                         }}
-                        className="glow-box-sm text-[#1a2030] px-6 py-3 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm border border-[#dde3ea] dark:border-white/20/40 flex items-center gap-2"
+                        className="glow-box-sm text-[#1a2030] dark:text-white px-6 py-3 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm border border-[#dde3ea] dark:border-white/20 flex items-center gap-2"
                       >
                         <RefreshCcw className="w-4 h-4 md:w-[18px] md:h-[18px]" />
                         {t.createAnother}
@@ -2173,7 +2173,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         <p className="text-[#6b7a8d] font-medium">{t.noPosters}</p>
                         <button
                           onClick={() => setFlowStep(0)}
-                          className="mt-6 glow-box-sm text-[#1a2030] px-6 py-2 rounded-xl text-sm border border-[#dde3ea] dark:border-white/20/40"
+                          className="mt-6 glow-box-sm text-[#1a2030] dark:text-white px-6 py-2 rounded-xl text-sm border border-[#dde3ea] dark:border-white/20"
                         >
                           {t.startBtn}
                         </button>
@@ -2198,18 +2198,18 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                               </div>
                               <div className="grid grid-cols-2 gap-2">
                                 {poster.tiles.map((tile, i) => (
-                                  <div key={i} className="group relative aspect-square glow-box-sm rounded-xl overflow-hidden border border-[#dde3ea] dark:border-white/20/40">
+                                  <div key={i} className="group relative aspect-square glow-box-sm rounded-xl overflow-hidden border border-[#dde3ea] dark:border-white/20">
                                     <img src={tile} alt={`Tile ${i}`} className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                       <button
                                         onClick={() => setPreviewImage(tile)}
-                                        className="glow-box-sm text-[#1a2030] px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
+                                        className="glow-box-sm text-[#1a2030] dark:text-white px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
                                       >
                                         {t.preview}
                                       </button>
                                       <button
                                         onClick={() => downloadTile(tile, i)}
-                                        className="glow-box-sm text-[#1a2030] px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
+                                        className="glow-box-sm text-[#1a2030] dark:text-white px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
                                       >
                                         {t.download}
                                       </button>
@@ -2225,7 +2225,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                             <button
                               onClick={fetchNextPagePosters}
                               disabled={isLoadingPosters}
-                              className="glow-box-sm text-[#1a2030] px-6 py-2.5 rounded-xl text-sm border border-[#dde3ea] dark:border-white/20/40 hover:border-[#4fc3f7] transition-all flex items-center gap-2"
+                              className="glow-box-sm text-[#1a2030] dark:text-white px-6 py-2.5 rounded-xl text-sm border border-[#dde3ea] dark:border-white/20 hover:border-[#4fc3f7] transition-all flex items-center gap-2"
                             >
                               {isLoadingPosters ? (
                                 <>
