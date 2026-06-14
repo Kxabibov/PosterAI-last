@@ -52,6 +52,12 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { ShaderAnimation } from './components/ui/shader-animation';
+import Lenis from 'lenis';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 import { auth, db, storage, googleProvider } from './firebase';
 import { UserProfile, PromptTemplate, FlowStep, UserPoster } from './types';
@@ -234,6 +240,7 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
   const [adminTab, setAdminTab] = useState<'users' | 'prompts' | 'soloPrompts' | null>(null);
   const [styleType, setStyleType] = useState<'standard' | 'solo'>('standard');
   const [flowStep, setFlowStep] = useState<FlowStep>(0);
@@ -276,6 +283,148 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [appLanguage, setAppLanguage] = useState<'English' | 'Russian' | 'Uzbek'>('English');
   const [showCookieBanner, setShowCookieBanner] = useState(() => !localStorage.getItem('cookieConsent'));
+
+  // Lenis & GSAP Smooth Scroll and ScrollTrigger synchronization
+  useGSAP(() => {
+    // Only run Lenis and scroll animations on flowStep 0 (Landing Page)
+    if (flowStep !== 0 || adminTab !== null) {
+      return;
+    }
+
+    // Initialize Lenis
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
+    });
+
+    // Synchronize scroll trigger with lenis
+    lenis.on('scroll', ScrollTrigger.update);
+
+    const tickHandler = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(tickHandler);
+
+    gsap.ticker.lagSmoothing(0);
+
+    // Hero title entrance animation
+    gsap.fromTo(".gsap-hero-title", 
+      { opacity: 0, y: 50, scale: 0.95 },
+      { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: "power4.out" }
+    );
+
+    // How It Works staggered cards
+    gsap.fromTo(".gsap-how-card",
+      { opacity: 0, y: 60, scale: 0.92 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        duration: 0.8, 
+        stagger: 0.18, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: "#how-it-works",
+          start: "top 85%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Example cards staggered scale-up
+    gsap.fromTo(".example-card",
+      { opacity: 0, scale: 0.85 },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "back.out(1.5)",
+        scrollTrigger: {
+          trigger: "#examples",
+          start: "top 85%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Comparison columns slide-in
+    gsap.fromTo(".gsap-comp-left",
+      { opacity: 0, x: -60 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: "#comparison",
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+    gsap.fromTo(".gsap-comp-right",
+      { opacity: 0, x: 60 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: "#comparison",
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Pricing cards 3D stagger entrance
+    gsap.fromTo(".pricing-card-animated",
+      { opacity: 0, y: 80, rotationY: -10 },
+      {
+        opacity: 1,
+        y: 0,
+        rotationY: 0,
+        duration: 0.9,
+        stagger: 0.2,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: "#pricing",
+          start: "top 85%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // General section titles
+    const headers = ["#how-it-works h2", "#examples h2", "#comparison h2", "#pricing h2"];
+    headers.forEach(h => {
+      gsap.fromTo(h,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: h,
+            start: "top 90%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+    });
+
+    // Cleanup function
+    return () => {
+      lenis.destroy();
+      gsap.ticker.remove(tickHandler);
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [flowStep, adminTab]);
 
   // Synchronize history with flowStep changes
   useEffect(() => {
@@ -1680,7 +1829,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     exit={{ opacity: 0, y: -20 }}
                     className="text-center py-2 md:py-6 relative w-full h-[320px] sm:h-[240px] md:h-[270px] lg:h-[340px] xl:h-[360px]"
                   >
-                    <h1 className="font-['Orbitron'] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-tight select-none flex flex-col justify-center items-center h-[220px] sm:h-[150px] md:h-[180px] lg:h-[210px] xl:h-[230px]">
+                    <h1 className="gsap-hero-title font-['Orbitron'] text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-tight select-none flex flex-col justify-center items-center h-[220px] sm:h-[150px] md:h-[180px] lg:h-[210px] xl:h-[230px]">
                       {appLanguage === 'English' ? (
                         <>Product card created<br />before your <TypewriterCycle 
                           phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
@@ -2284,19 +2433,15 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 { img: '/step3.png', text: t.howStep3, num: '03', color: 'teal' }
               ].map((step, i) => (
                 <React.Fragment key={i}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.15 }}
-                    className={"blob-card " + step.color}
+                  <div
+                    className={"blob-card gsap-how-card " + step.color}
                   >
                     <div className="blob-card-bg">
                       <img src={step.img} alt={step.text} style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'8px',marginBottom:'12px'}} />
                       <span className="text-xs font-bold text-[#4fc3f7] bg-[#4fc3f7]/10 px-2.5 py-1 rounded-full mb-2 inline-block">{step.num}</span>
                       <h3 className="font-['Orbitron'] text-sm font-bold text-center mt-2">{step.text}</h3>
                     </div>
-                  </motion.div>
+                  </div>
                   {i < 2 && <div className="connection-line" style={{left:'calc(100% - 0px)'}}></div>}
                 </React.Fragment>
               ))}
@@ -2331,7 +2476,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               <p className="text-[#6b7a8d] dark:text-gray-300 text-sm md:text-base max-w-xl mx-auto">{t.compSub}</p>
             </div>
             <div className="comparison-split-wrapper">
-              <motion.div initial={{ opacity:0, x:-40 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} className="comparison-split-left">
+              <div className="comparison-split-left gsap-comp-left">
                 <div className="comparison-split-header">
                   <div className="comparison-split-icon comparison-split-icon-red">
                     <Camera size={24} className="text-red-400" />
@@ -2351,13 +2496,13 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 </div>
                 <div className="comparison-frustration-bar"><div className="comparison-frustration-fill"></div></div>
                 <p className="text-red-400/60 text-xs mt-2 text-center">Workflow frustration: HIGH</p>
-              </motion.div>
+              </div>
               <div className="comparison-divider">
                 <div className="comparison-divider-line"></div>
                 <div className="comparison-divider-vs">VS</div>
                 <div className="comparison-divider-line"></div>
               </div>
-              <motion.div initial={{ opacity:0, x:40 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} className="comparison-split-right">
+              <div className="comparison-split-right gsap-comp-right">
                 <div className="comparison-split-header">
                   <div className="comparison-split-icon comparison-split-icon-blue">
                     <Sparkles size={24} className="text-[#4fc3f7]" />
@@ -2377,7 +2522,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 </div>
                 <div className="comparison-success-bar"><div className="comparison-success-fill"></div></div>
                 <p className="text-[#4fc3f7]/60 text-xs mt-2 text-center">Workflow efficiency: INSTANT</p>
-              </motion.div>
+              </div>
             </div>
           </section>
 
@@ -2394,7 +2539,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                   { name: 'Standard', price: '150,000', credits: 150, icon: Zap, iconClass: 'text-yellow-400 animate-pulse', popular: true, saving: 'Save 33%', originalPrice: '225,000', blobColor: 'rgba(79,195,247,0.6)' },
                   { name: 'Premium', price: '250,000', credits: 300, icon: ShieldCheck, iconClass: 'text-green-400', saving: 'Save 44%', originalPrice: '450,000', blobColor: 'rgba(34,197,94,0.4)' }
                 ].map((plan, i) => (
-                  <motion.div key={i} initial={{ opacity:0, y:30 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay: i * 0.1 }} className={"pricing-card-animated flex flex-col relative overflow-visible" + (plan.popular ? " popular-animated" : "")}>
+                  <div key={i} className={"pricing-card-animated flex flex-col relative overflow-visible" + (plan.popular ? " popular-animated" : "")}>
                     {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1a7aad] to-[#4fc3f7] text-[#0a0d12] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(79,195,247,0.5)] z-20">{t.mostPopular}</div>}
                     <div className="pricing-card-border-wrap relative overflow-hidden w-full h-full flex flex-col flex-1">
                       <div className="pricing-blob" style={{ background: plan.blobColor }}></div>
@@ -2429,7 +2574,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         </a>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
               <p className="text-center mt-8 text-xs text-white/40">{t.manualPayment}</p>
