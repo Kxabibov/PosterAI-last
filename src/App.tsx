@@ -1,3 +1,4 @@
+import confetti from 'canvas-confetti';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   onAuthStateChanged,
@@ -70,9 +71,8 @@ const CREDITS_PER_GEN = 10;
 // --- Components ---
 
 const Background = ({ theme }: { theme: 'light' | 'dark' }) => (
-  <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
-    <ShaderAnimation />
-    <div className={`absolute inset-0 transition-colors duration-700 backdrop-blur-[2px] ${theme === 'dark' ? 'bg-[#0a0d12]/45' : 'bg-[#f4f7fa]/75'}`}></div>
+  <div className="grid-wrapper">
+    <div className="grid-background"></div>
   </div>
 );
 
@@ -135,10 +135,10 @@ const Toast = ({ message, type, onClose }: ToastProps) => (
     initial={{ opacity: 0, x: 20 }}
     animate={{ opacity: 1, x: 0 }}
     exit={{ opacity: 0, x: 20 }}
-    className={`min-w-[260px] max-w-[380px] glow-box rounded-lg p-4 shadow-xl flex items-center gap-3 border-l-4 ${type === 'success' ? 'border-l-[#4fc3f7]' : type === 'error' ? 'border-l-[#ff7b72]' : 'border-l-[#dde3ea]'
+    className={`min-w-[260px] max-w-[380px] glow-box rounded-lg p-4 shadow-xl flex items-center gap-3 border-l-4 ${type === 'success' ? 'border-l-[var(--accent)]' : type === 'error' ? 'border-l-[#ff7b72]' : 'border-l-[#dde3ea]'
       }`}
   >
-    <span className={type === 'success' ? 'text-[#1a7aad]' : type === 'error' ? 'text-[#ff7b72]' : 'text-[#dde3ea]'}>
+    <span className={type === 'success' ? 'text-[var(--accent-hover)]' : type === 'error' ? 'text-[#ff7b72]' : 'text-[#dde3ea]'}>
       {type === 'success' ? <CheckCircle2 size={18} /> : type === 'error' ? <X size={18} /> : <Zap size={18} />}
     </span>
     <span className="text-sm text-[#1a2030] dark:text-white">{message}</span>
@@ -229,7 +229,12 @@ function useDraggableAutoScroll(speed = 1, direction = 'left', sets = 2) {
 }
 
 export default function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('theme');
+    return (saved === 'dark' || saved === 'light') ? saved : 'light';
+  });
+  const [activeHow, setActiveHow] = useState<number>(0);
+  const [activeComp, setActiveComp] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
@@ -458,7 +463,7 @@ export default function App() {
 
   const translations = {
     English: {
-      heroTitle: <>Product card created<br />before your <span className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">coffee cools</span></>,
+      heroTitle: <>Product card created<br />before your <span className="bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent">coffee cools</span></>,
       backBtn: "Back",
       startBtn: "Start Creating",
       credits: "credits",
@@ -535,6 +540,16 @@ export default function App() {
       howStep1: "Take a picture",
       howStep2: "Choose a design you like",
       howStep3: "Get a ready high-quality image",
+      howStep1Desc: "Select or snap a clean photo of your product. Transparent or simple backgrounds work best.",
+      howStep1Btn: "Camera",
+      howStep2Desc: "Browse our collection of professional design templates or enter your own custom style prompts.",
+      howStep2Btn: "Templates",
+      howStep3Desc: "Our AI automatically handles background removal, lighting matching, and generates studio-quality posters.",
+      howStep3Btn: "Download",
+      compTradDesc: "Traditional workflows are slow, require hiring specialists, renting studios, and manual editing.",
+      compTradBtn: "Manual",
+      compAiDesc: "AI generates professional templates instantly with automatic background removal and lighting matching.",
+      compAiBtn: "Automated",
       // Examples
       exploreExamples: "Explore the Examples",
       // Comparison
@@ -573,7 +588,7 @@ export default function App() {
       cookieDecline: "Decline"
     },
     Russian: {
-      heroTitle: <>Карточка товара готова,<br />пока ваш <span className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">кофе остывает</span></>,
+      heroTitle: <>Карточка товара готова,<br />пока ваш <span className="bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent">кофе остывает</span></>,
       backBtn: "Назад",
       startBtn: "Начать создание",
       credits: "кредитов",
@@ -648,6 +663,16 @@ export default function App() {
       howStep1: "Сфотографируйте товар",
       howStep2: "Выберите понравившийся дизайн",
       howStep3: "Получите готовое изображение высокого качества",
+      howStep1Desc: "Выберите или сделайте четкое фото вашего товара. Простые фоны подходят лучше всего.",
+      howStep1Btn: "Камера",
+      howStep2Desc: "Просмотрите коллекцию профессиональных шаблонов или введите свой собственный стиль.",
+      howStep2Btn: "Шаблоны",
+      howStep3Desc: "Наш ИИ автоматически удалит фон, настроит освещение и создаст постер студийного качества.",
+      howStep3Btn: "Скачать",
+      compTradDesc: "Традиционный рабочий процесс медленный, требует найма специалистов, аренды студии и ручной ретуши.",
+      compTradBtn: "Вручную",
+      compAiDesc: "ИИ мгновенно создает профессиональные шаблоны с автоматическим удалением фона и рендером света.",
+      compAiBtn: "Автомат",
       exploreExamples: "Посмотрите примеры",
       compTitle: "Ваш товар заслуживает лучшего, чем скучные фото.",
       compSub: "Создавайте премиальные визуалы для маркетплейсов с ИИ за секунды.",
@@ -680,7 +705,7 @@ export default function App() {
       cookieDecline: "Отклонить"
     },
     Uzbek: {
-      heroTitle: <>Qahvangiz sovuguncha<br /><span className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">mahsulot kartasi</span> tayyor</>,
+      heroTitle: <>Qahvangiz sovuguncha<br /><span className="bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent">mahsulot kartasi</span> tayyor</>,
       backBtn: "Orqaga",
       startBtn: "Yaratishni boshlash",
       credits: "kredit",
@@ -755,6 +780,16 @@ export default function App() {
       howStep1: "Mahsulotni suratga oling",
       howStep2: "Yoqqan dizaynni tanlang",
       howStep3: "Tayyor yuqori sifatli rasmni oling",
+      howStep1Desc: "Mahsulotingizni tiniq suratini tanlang yoki oling. Oddiy fonlar eng yaxshi natija beradi.",
+      howStep1Btn: "Kamera",
+      howStep2Desc: "Professional dizayn shablonlarini ko'rib chiqing yoki o'z shaxsiy uslubingizni kiriting.",
+      howStep2Btn: "Shablonlar",
+      howStep3Desc: "Bizning AI avtomat ravishda fonni olib tashlaydi va studiya sifatidagi rasmni yaratadi.",
+      howStep3Btn: "Yuklab olish",
+      compTradDesc: "An'anaviy ish jarayoni sekin, mutaxassislarni yollash, studiya ijarasi va qo'lda tahrirlashni talab qiladi.",
+      compTradBtn: "Qo'lda",
+      compAiDesc: "AI bir zumda fonni olib tashlash va yoritishni moslashtirish bilan professional shablonlarni yaratadi.",
+      compAiBtn: "Avtomat",
       exploreExamples: "Namunalarni ko'ring",
       compTitle: "Mahsulotingiz zerikarli rasmlardan yaxshiroqqa loyiq.",
       compSub: "AI yordamida bir necha soniyada premium marketplace vizuallari yarating.",
@@ -1247,6 +1282,11 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       setGenStep(5);
       setFlowStep(5);
       addToast('Poster generated successfully!', 'success');
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
     } catch (error: any) {
       console.error(error);
       // Clean up any successfully uploaded tiles to prevent orphaned files on network disruption
@@ -1385,11 +1425,11 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
       <Background theme={theme} />
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-[100] flex items-center justify-between px-4 md:px-8 py-2 md:py-4 bg-white/60 dark:bg-black/40 backdrop-blur-xl border-b border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30">
+      <nav className="sticky top-0 z-[100] flex items-center justify-between px-4 md:px-8 py-2 md:py-4 bg-white/60 dark:bg-black/40 backdrop-blur-xl border-b border-[var(--accent)]/10 dark:border-[var(--accent)]/30">
         <div className="flex items-center gap-6">
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="p-2 glow-box-sm rounded-full text-[#1a2030] dark:text-white hover:text-[#1a7aad] dark:hover:text-[#4fc3f7] transition-all flex items-center justify-center mr-1"
+            className="p-2 glow-box-sm rounded-full text-[#1a2030] dark:text-white hover:text-[var(--accent-hover)] dark:hover:text-[var(--accent)] transition-all flex items-center justify-center mr-1"
             title="Toggle Theme"
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -1398,12 +1438,12 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
             className="flex items-center gap-2 md:gap-3 cursor-pointer"
             onClick={() => { setFlowStep(0); setAdminTab(null); }}
           >
-            <img src="/logo.png" alt="Nidu AI" className="h-6 md:h-8 object-contain drop-shadow-[0_0_8px_rgba(79,195,247,0.35)]" />
-            <span className="font-['Orbitron'] text-lg md:text-lg font-extrabold tracking-tighter bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">
+            <img src="/logo.png" alt="Nidu AI" className="h-6 md:h-8 object-contain drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.35)]" />
+            <span className="font-['Orbitron'] text-lg md:text-lg font-extrabold tracking-tighter bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent">
               Nidu AI
             </span>
             {profile && (
-              <span className="md:hidden ml-2 font-['Orbitron'] text-[10px] font-bold text-[#1a7aad] dark:text-[#4fc3f7] bg-[#4fc3f7]/10 px-2 py-0.5 rounded-full border border-[#4fc3f7]/20">
+              <span className="md:hidden ml-2 font-['Orbitron'] text-[10px] font-bold text-[var(--accent-hover)] dark:text-[var(--accent)] bg-[var(--accent)]/10 px-2 py-0.5 rounded-full border border-[var(--accent)]/20">
                 {profile.credits} cr
               </span>
             )}
@@ -1414,7 +1454,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               <button
                 key={lang}
                 onClick={() => setAppLanguage(lang)}
-                className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${appLanguage === lang ? 'bg-[#4fc3f7]/15 text-[#1a7aad]' : 'text-[#6b7a8d] hover:text-[#0d1520]'
+                className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${appLanguage === lang ? 'bg-[var(--accent)]/15 text-[var(--accent-hover)]' : 'text-[#6b7a8d] hover:text-[#0d1520]'
                   }`}
               >
                 {lang === 'English' ? 'EN' : lang === 'Russian' ? 'RU' : 'UZ'}
@@ -1426,11 +1466,11 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
         {/* Desktop Nav Actions */}
         <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-1 md:gap-2 glow-box-sm px-2 py-1 md:px-4 md:py-1.5 rounded-full text-[10px] md:text-xs font-medium">
-            <Sparkles size={14} className="text-[#1a7aad]" />
+            <Sparkles size={14} className="text-[var(--accent-hover)]" />
             <span>{profile?.credits ?? 0} {t.credits}</span>
             <button
               onClick={() => setIsPricingModalOpen(true)}
-              className="ml-2 text-[#1a7aad] hover:underline flex items-center gap-1"
+              className="ml-2 text-[var(--accent-hover)] hover:underline flex items-center gap-1"
             >
               <Plus size={12} />
               {t.buy}
@@ -1441,21 +1481,21 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
             <>
               <button
                 onClick={() => { setAdminTab(adminTab === 'prompts' ? null : 'prompts'); setFlowStep(0); }}
-                className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${adminTab === 'prompts' ? 'btn-glossy text-[#1a7aad]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
+                className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${adminTab === 'prompts' ? 'btn-glossy text-[var(--accent-hover)]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
               >
                 <Sparkles size={14} />
                 {t.promptLib}
               </button>
               <button
                 onClick={() => { setAdminTab(adminTab === 'soloPrompts' ? null : 'soloPrompts'); setFlowStep(0); }}
-                className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${adminTab === 'soloPrompts' ? 'btn-glossy text-[#1a7aad]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
+                className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${adminTab === 'soloPrompts' ? 'btn-glossy text-[var(--accent-hover)]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
               >
                 <Sparkles size={14} />
                 {appLanguage === 'English' ? 'Solo Prompts' : appLanguage === 'Russian' ? 'Соло промпты' : 'Yakka prompstlar'}
               </button>
               <button
                 onClick={() => { setAdminTab(adminTab === 'users' ? null : 'users'); setFlowStep(0); }}
-                className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${adminTab === 'users' ? 'btn-glossy text-[#1a7aad]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
+                className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${adminTab === 'users' ? 'btn-glossy text-[var(--accent-hover)]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
               >
                 <ShieldCheck size={14} />
                 {adminTab === 'users' ? t.exitAdmin : t.admin}
@@ -1472,7 +1512,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 setAdminTab(null);
               }
             }}
-            className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${flowStep === 6 ? 'btn-glossy text-[#1a7aad]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
+            className={`flex items-center gap-1 md:gap-2 px-2 py-1 md:px-4 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium transition-all ${flowStep === 6 ? 'btn-glossy text-[var(--accent-hover)]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
           >
             <LayoutDashboard size={14} />
             {t.myInventory}
@@ -1507,7 +1547,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
             className="fixed top-16 right-4 z-[200] w-64 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#dde3ea]/80 dark:border-white/10 p-5 flex flex-col gap-4 text-left"
           >
             <div className="flex items-center justify-between pb-2 border-b border-[#dde3ea]/50 dark:border-white/10">
-              <span className="font-['Orbitron'] text-sm font-extrabold tracking-tighter bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">
+              <span className="font-['Orbitron'] text-sm font-extrabold tracking-tighter bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent">
                 Nidu AI
               </span>
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 text-[#6b7a8d] hover:text-[#0d1520] transition-colors">
@@ -1516,9 +1556,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
             </div>
             
             <div className="flex flex-col gap-3">
-              <a href="#how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors">{t.howItWorksTitle}</a>
-              <a href="#examples" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors">{t.exploreExamples}</a>
-              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors">{t.pricingTitle}</a>
+              <a href="#how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[var(--accent-hover)] transition-colors">{t.howItWorksTitle}</a>
+              <a href="#examples" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[var(--accent-hover)] transition-colors">{t.exploreExamples}</a>
+              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[var(--accent-hover)] transition-colors">{t.pricingTitle}</a>
               
               <div className="border-t border-[#dde3ea]/50 dark:border-white/10 my-1"></div>
               
@@ -1532,9 +1572,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     setAdminTab(null);
                   }
                 }}
-                className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors flex items-center gap-2"
+                className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[var(--accent-hover)] transition-colors flex items-center gap-2"
               >
-                <LayoutDashboard size={14} className="text-[#1a7aad]" />
+                <LayoutDashboard size={14} className="text-[var(--accent-hover)]" />
                 {t.myInventory}
               </button>
 
@@ -1546,9 +1586,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       setAdminTab(adminTab === 'soloPrompts' ? null : 'soloPrompts');
                       setFlowStep(0);
                     }}
-                    className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors flex items-center gap-2"
+                    className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[var(--accent-hover)] transition-colors flex items-center gap-2"
                   >
-                    <Sparkles size={14} className="text-[#1a7aad]" />
+                    <Sparkles size={14} className="text-[var(--accent-hover)]" />
                     {appLanguage === 'English' ? 'Solo Prompts' : appLanguage === 'Russian' ? 'Соло промпты' : 'Yakka prompstlar'}
                   </button>
                   <button
@@ -1557,9 +1597,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       setAdminTab(adminTab === 'users' ? null : 'users');
                       setFlowStep(0);
                     }}
-                    className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[#1a7aad] transition-colors flex items-center gap-2"
+                    className="text-left font-['Orbitron'] text-xs font-bold text-gray-800 dark:text-gray-200 hover:text-[var(--accent-hover)] transition-colors flex items-center gap-2"
                   >
-                    <ShieldCheck size={14} className="text-[#1a7aad]" />
+                    <ShieldCheck size={14} className="text-[var(--accent-hover)]" />
                     {adminTab === 'users' ? t.exitAdmin : t.admin}
                   </button>
                 </>
@@ -1582,7 +1622,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     setIsMobileMenuOpen(false);
                     signIn();
                   }}
-                  className="text-left font-['Orbitron'] text-xs font-bold text-[#1a7aad] hover:text-[#4fc3f7] transition-colors flex items-center gap-2 mt-1"
+                  className="text-left font-['Orbitron'] text-xs font-bold text-[var(--accent-hover)] hover:text-[var(--accent)] transition-colors flex items-center gap-2 mt-1"
                 >
                   <LogOut size={14} className="rotate-180" />
                   {appLanguage === 'English' ? 'Sign In' : appLanguage === 'Russian' ? 'Войти' : 'Kirish'}
@@ -1600,7 +1640,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       setAppLanguage(lang);
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`py-1.5 rounded-lg text-[10px] font-bold transition-all border ${appLanguage === lang ? 'bg-[#4fc3f7]/15 text-[#1a7aad] border-[#4fc3f7]/30' : 'bg-white/5 dark:bg-white/10 border-[#dde3ea] dark:border-white/20 text-[#6b7a8d]'
+                    className={`py-1.5 rounded-lg text-[10px] font-bold transition-all border ${appLanguage === lang ? 'bg-[var(--accent)]/15 text-[var(--accent-hover)] border-[var(--accent)]/30' : 'bg-white/5 dark:bg-white/10 border-[#dde3ea] dark:border-white/20 text-[#6b7a8d]'
                       }`}
                   >
                     {lang === 'English' ? 'EN' : lang === 'Russian' ? 'RU' : 'UZ'}
@@ -1631,16 +1671,16 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
                   {/* Users Table */}
                   <section className="glow-box rounded-2xl overflow-hidden">
-                    <div className="p-6 border-b border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30">
+                    <div className="p-6 border-b border-[var(--accent)]/10 dark:border-[var(--accent)]/30">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <LayoutDashboard size={18} className="text-[#1a7aad]" />
+                        <LayoutDashboard size={18} className="text-[var(--accent-hover)]" />
                         {t.userMgmt}
                       </h3>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left">
                         <thead>
-                          <tr className="text-[11px] uppercase tracking-wider text-[#6b7a8d] border-b border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30">
+                          <tr className="text-[11px] uppercase tracking-wider text-[#6b7a8d] border-b border-[var(--accent)]/10 dark:border-[var(--accent)]/30">
                             <th className="px-6 py-4 font-medium">{t.user}</th>
                             <th className="px-6 py-4 font-medium">{t.credits}</th>
                             <th className="px-6 py-4 font-medium">{t.joined}</th>
@@ -1649,13 +1689,13 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         </thead>
                         <tbody className="divide-y divide-[#dde3ea]/30">
                           {allUsers.map(u => (
-                            <tr key={u.uid} className="hover:bg-[#4fc3f7]/12 transition-colors">
+                            <tr key={u.uid} className="hover:bg-[var(--accent)]/12 transition-colors">
                               <td className="px-6 py-4">
                                 <div className="font-medium">{u.name || '—'}</div>
                                 <div className="text-xs text-[#6b7a8d]">{u.email}</div>
                               </td>
                               <td className="px-6 py-4">
-                                <span className="bg-[#4fc3f7]/12 text-[#1a7aad] px-2.5 py-1 rounded-full text-xs font-bold">
+                                <span className="bg-[var(--accent)]/12 text-[var(--accent-hover)] px-2.5 py-1 rounded-full text-xs font-bold">
                                   {u.credits}
                                 </span>
                               </td>
@@ -1666,7 +1706,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                                 <div className="flex items-center gap-2">
                                   <button
                                     onClick={() => adjustCredits(u.uid, 10)}
-                                    className="p-1.5 glow-box-sm rounded hover:border-[#4fc3f7] transition-all text-[#1a7aad] text-[10px] font-bold"
+                                    className="p-1.5 glow-box-sm rounded hover:border-[var(--accent)] transition-all text-[var(--accent-hover)] text-[10px] font-bold"
                                     title="+10 Credits"
                                   >
                                     +10
@@ -1681,7 +1721,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                                   <div className="w-[1px] h-4 bg-white/10 mx-1" />
                                   <button
                                     onClick={() => adjustCredits(u.uid, 50)}
-                                    className="p-1.5 glow-box-sm rounded hover:border-[#4fc3f7] transition-all text-[#1a7aad]"
+                                    className="p-1.5 glow-box-sm rounded hover:border-[var(--accent)] transition-all text-[var(--accent-hover)]"
                                     title="+50 Credits"
                                   >
                                     <Plus size={14} />
@@ -1711,7 +1751,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <div className="flex gap-2">
                       <button
                         onClick={() => setIsPromptModalOpen(true)}
-                        className="flex items-center gap-2 btn-glossy text-[#1a7aad] px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                        className="flex items-center gap-2 btn-glossy text-[var(--accent-hover)] px-4 py-2 rounded-lg text-sm font-semibold transition-all"
                       >
                         <Plus size={16} />
                         {t.newPrompt}
@@ -1727,7 +1767,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               {p.imageUrl ? (
-                                <img src={p.imageUrl} alt={p.name} className="w-12 h-12 rounded-lg object-cover border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30" />
+                                <img src={p.imageUrl} alt={p.name} className="w-12 h-12 rounded-lg object-cover border border-[var(--accent)]/10 dark:border-[var(--accent)]/30" />
                               ) : (
                                 <span className="text-lg w-12 h-12 flex items-center justify-center glow-box-sm rounded-lg border border-[#dde3ea] dark:border-white/20">{p.icon}</span>
                               )}
@@ -1739,7 +1779,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                             <div className="flex gap-2">
                               <button
                                 onClick={() => { setEditingPrompt(p); setIsPromptModalOpen(true); }}
-                                className="p-2 glow-box-sm rounded-lg hover:text-[#1a7aad] transition-all"
+                                className="p-2 glow-box-sm rounded-lg hover:text-[var(--accent-hover)] transition-all"
                               >
                                 <Edit size={16} />
                               </button>
@@ -1782,7 +1822,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-['Orbitron'] tracking-wider uppercase border transition-all duration-300 ${
                         isRemovingBg 
                           ? 'opacity-50 cursor-not-allowed border-transparent bg-white/5 text-gray-500' 
-                          : 'border-white/10 bg-white/5 hover:bg-[#1a7aad]/20 hover:border-[#4fc3f7]/50 text-gray-300 hover:text-white drop-shadow-[0_0_15px_rgba(79,195,247,0.1)]'
+                          : 'border-white/10 bg-white/5 hover:bg-[var(--accent-hover)]/20 hover:border-[var(--accent)]/50 text-gray-300 hover:text-white drop-shadow-[0_0_15px_rgba(var(--accent-rgb),0.1)]'
                       }`}
                     >
                       <ArrowLeft size={14} />
@@ -1798,7 +1838,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         <React.Fragment key={s}>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
                             flowStep === s 
-                              ? 'bg-[#4fc3f7]/15 text-[#4fc3f7] border border-[#4fc3f7] shadow-[0_0_15px_rgba(79,195,247,0.4)]' :
+                              ? 'bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)] shadow-[0_0_15px_rgba(var(--accent-rgb),0.4)]' :
                             flowStep > s 
                               ? 'bg-[#22c55e]/10 text-[#22c55e] border border-[#22c55e]/40' :
                               'bg-white/5 dark:bg-white/10 text-[#6b7a8d] border border-[#dde3ea] dark:border-white/10'
@@ -1833,17 +1873,17 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       {appLanguage === 'English' ? (
                         <>Product card created<br />before your <TypewriterCycle 
                           phrases={['coffee cools', 'WiFi has doubts', 'designer answers', 'lunch arrives', 'meeting starts', 'page loads']} 
-                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                          className="bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
                         /></>
                       ) : appLanguage === 'Russian' ? (
                         <>Карточка товара будет готова<br />быстрее, чем <TypewriterCycle 
                           phrases={['остынет кофе', 'ответит дизайнер', 'начнется созвон', 'загрузится страница']} 
-                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                          className="bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
                         /></>
                       ) : (
                         <>Mahsulot kartasi tayyor bo'ladi,<br /><TypewriterCycle 
                           phrases={['qahva soviguncha', 'dizayner javob berguncha', 'majlis boshlanguncha']} 
-                          className="bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]"
+                          className="bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]"
                         /></>
                       )}
                     </h1>
@@ -1891,9 +1931,9 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       onDrop={handleDrop}
                       onDragOver={handleDragOver}
                     >
-                      <div className="absolute -inset-1 bg-gradient-to-br from-[#4fc3f7] to-[#dde3ea] rounded-[32px] opacity-10 group-hover:opacity-25 transition-opacity blur-xl" />
-                      <div className="relative glow-box border-2 border-dashed border-[#4fc3f7]/25 rounded-[20px] md:rounded-[32px] p-6 md:p-10 text-center space-y-3 md:space-y-6 group-hover:border-[#4fc3f7]/40 transition-all">
-                        <div className="w-12 h-12 md:w-20 md:h-20 glow-box-sm rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-sm md:text-base group-hover:scale-110 transition-transform text-[#4fc3f7]">
+                      <div className="absolute -inset-1 bg-gradient-to-br from-[var(--accent)] to-[#dde3ea] rounded-[32px] opacity-10 group-hover:opacity-25 transition-opacity blur-xl" />
+                      <div className="relative glow-box border-2 border-dashed border-[var(--accent)]/25 rounded-[20px] md:rounded-[32px] p-6 md:p-10 text-center space-y-3 md:space-y-6 group-hover:border-[var(--accent)]/40 transition-all">
+                        <div className="w-12 h-12 md:w-20 md:h-20 glow-box-sm rounded-xl md:rounded-2xl flex items-center justify-center mx-auto text-sm md:text-base group-hover:scale-110 transition-transform text-[var(--accent)]">
                           <Upload size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
@@ -1903,7 +1943,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                         <div className="flex gap-2 md:gap-3 justify-center flex-col sm:flex-row">
                           <button
                             onClick={(e) => { e.stopPropagation(); document.getElementById('file-input')?.click(); }}
-                            className="btn-glossy text-[#1a7aad] px-4 py-2.5 md:px-6 md:py-3 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2"
+                            className="btn-glossy text-[var(--accent-hover)] px-4 py-2.5 md:px-6 md:py-3 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2"
                           >
                             <Upload size={14} className="md:w-4 md:h-4" />
                             {t.uploadBtn}
@@ -1949,14 +1989,14 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       <p className="text-[#6b7a8d] text-sm">{t.step2Desc}</p>
                     </div>
 
-                    <div className="w-full max-w-[200px] md:max-w-sm mx-auto aspect-square glow-box-sm rounded-2xl border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 overflow-hidden relative group">
+                    <div className="w-full max-w-[200px] md:max-w-sm mx-auto aspect-square glow-box-sm rounded-2xl border border-[var(--accent)]/10 dark:border-[var(--accent)]/30 overflow-hidden relative group">
                       <img
                         src={processedImage || uploadedImage || ''}
                         className="w-full h-full object-contain"
                         alt="Preview"
                       />
                       {!isRemovingBg && !bgError && (
-                        <div className="absolute top-4 right-4 btn-glossy text-[#1a7aad] text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
+                        <div className="absolute top-4 right-4 btn-glossy text-[var(--accent-hover)] text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
                           {t.bgRemoved}
                         </div>
                       )}
@@ -1965,7 +2005,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <div className="text-center">
                       {isRemovingBg ? (
                         <div className="flex flex-col items-center gap-4">
-                          <Loader2 className="animate-spin text-[#1a7aad]" size={32} />
+                          <Loader2 className="animate-spin text-[var(--accent-hover)]" size={32} />
                           <p className="text-[#6b7a8d] text-sm">{t.removingBg}</p>
                         </div>
                       ) : bgError ? (
@@ -1981,7 +2021,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       ) : (
                         <button
                           onClick={() => setFlowStep(3)}
-                          className="btn-glossy text-[#1a7aad] px-6 py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm shadow-lg transition-all"
+                          className="btn-glossy text-[var(--accent-hover)] px-6 py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm shadow-lg transition-all"
                         >
                           {t.continueStyles}
                         </button>
@@ -2005,13 +2045,13 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <div className="flex justify-center gap-4 mb-6">
                       <button
                         onClick={() => { setStyleType('standard'); setSelectedStyle(null); }}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${styleType === 'standard' ? 'btn-glossy text-[#1a7aad] border-[#4fc3f7]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${styleType === 'standard' ? 'btn-glossy text-[var(--accent-hover)] border-[var(--accent)]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
                       >
                         ⚡ {translations[appLanguage].standardPrompts || 'Standard Styles (4 images)'} (10 Credits)
                       </button>
                       <button
                         onClick={() => { setStyleType('solo'); setSelectedStyle(null); }}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${styleType === 'solo' ? 'btn-glossy text-[#1a7aad] border-[#4fc3f7]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${styleType === 'solo' ? 'btn-glossy text-[var(--accent-hover)] border-[var(--accent)]' : 'glow-box-sm text-[#6b7a8d] hover:text-[#0d1520]'}`}
                       >
                         ✦ {translations[appLanguage].soloPrompts || 'Solo Styles (1 image)'} (5 Credits)
                       </button>
@@ -2025,7 +2065,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                             onClick={() => setSelectedStyle(p)}
                             className={`group relative text-left transition-all flex flex-col items-center gap-3`}
                           >
-                            <div className={`w-full aspect-[4/5] rounded-[24px] overflow-hidden border-2 transition-all shadow-md ${selectedStyle?.id === p.id ? 'border-[#4fc3f7] shadow-[0_0_24px_rgba(79,195,247,0.3)] scale-[1.02]' : 'border-transparent hover:border-[#4fc3f7]/30 hover:shadow-xl'}`}>
+                            <div className={`w-full aspect-[4/5] rounded-[24px] overflow-hidden border-2 transition-all shadow-md ${selectedStyle?.id === p.id ? 'border-[var(--accent)] shadow-[0_0_24px_rgba(var(--accent-rgb),0.3)] scale-[1.02]' : 'border-transparent hover:border-[var(--accent)]/30 hover:shadow-xl'}`}>
                               {p.imageUrl ? (
                                 <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                               ) : (
@@ -2035,7 +2075,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                               )}
                             </div>
                             <div className="text-center w-full px-1">
-                               <span className={`font-['Orbitron'] font-bold text-sm md:text-base transition-colors ${selectedStyle?.id === p.id ? 'text-[#1a7aad]' : 'text-[#1a2030] dark:text-white'}`}>
+                               <span className={`font-['Orbitron'] font-bold text-sm md:text-base transition-colors ${selectedStyle?.id === p.id ? 'text-[var(--accent-hover)]' : 'text-[#1a2030] dark:text-white'}`}>
                                  {p.name}
                                </span>
                                <p className="text-[10px] text-[#6b7a8d] dark:text-[#a0aec0] line-clamp-1 mt-0.5">{p.description}</p>
@@ -2050,7 +2090,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           <select
                             value={language}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="w-full glow-box rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4fc3f7] transition-colors appearance-none"
+                            className="w-full glow-box rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors appearance-none"
                           >
                             <option value="English">🇬🇧 English</option>
                             <option value="Russian">🇷🇺 Russian</option>
@@ -2064,7 +2104,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                             value={productName}
                             onChange={(e) => setProductName(e.target.value)}
                             placeholder="e.g. Luxury Perfume"
-                            className="w-full glow-box rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4fc3f7] transition-colors"
+                            className="w-full glow-box rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors"
                           />
                         </div>
                       </div>
@@ -2074,7 +2114,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                           value={promptAddition}
                           onChange={(e) => setPromptAddition(e.target.value)}
                           placeholder={t.promptAdditionsPlaceholder}
-                          className="w-full glow-box rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4fc3f7] transition-colors resize-none h-20"
+                          className="w-full glow-box rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--accent)] transition-colors resize-none h-20"
                         />
                       </div>
                     </div>
@@ -2083,7 +2123,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       <button
                         onClick={startGeneration}
                         disabled={!selectedStyle || isGenerating}
-                        className="btn-glossy text-[#1a7aad] px-8 py-3 md:px-10 md:py-4 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed gap-2 md:gap-3 mx-auto"
+                        className="btn-glossy text-[var(--accent-hover)] px-8 py-3 md:px-10 md:py-4 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed gap-2 md:gap-3 mx-auto"
                       >
                         <Zap size={20} />
                         {t.genBtn}
@@ -2233,7 +2273,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     </div>
 
                     <div className="space-y-2 max-w-md mx-auto">
-                      <h3 className="font-['Orbitron'] text-xs md:text-sm font-bold tracking-tight bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(79,195,247,0.3)]">{t.cookingText}</h3>
+                      <h3 className="font-['Orbitron'] text-xs md:text-sm font-bold tracking-tight bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent italic drop-shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]">{t.cookingText}</h3>
                       <p className="text-[#6b7a8d] text-xs md:text-sm max-w-sm mx-auto leading-relaxed">
                         {selectedStyle?.isSolo 
                           ? (appLanguage === 'English' ? 'Our AI is crafting your custom poster' : appLanguage === 'Russian' ? 'Наш ИИ готовит ваш уникальный постер' : 'Bizning AI siz uchun maxsus poster yaratmoqda')
@@ -2255,7 +2295,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       <p className="text-[#6b7a8d] text-sm">{t.readyDesc}</p>
                     </div>
 
-                    <div className={generatedTiles.length === 1 ? "max-w-md mx-auto aspect-[4/5] bg-white/5 dark:bg-white/10 backdrop-blur-xl rounded-xl md:rounded-2xl border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 overflow-hidden relative group" : "grid grid-cols-2 gap-2 md:gap-4"}>
+                    <div className={generatedTiles.length === 1 ? "max-w-md mx-auto aspect-[4/5] bg-white/5 dark:bg-white/10 backdrop-blur-xl rounded-xl md:rounded-2xl border border-[var(--accent)]/10 dark:border-[var(--accent)]/30 overflow-hidden relative group" : "grid grid-cols-2 gap-2 md:gap-4"}>
                       {generatedTiles.map((tile, i) => (
                         generatedTiles.length === 1 ? (
                           <React.Fragment key={i}>
@@ -2271,7 +2311,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                             </div>
                           </React.Fragment>
                         ) : (
-                          <div key={i} className="group relative aspect-square bg-white/5 dark:bg-white/10 backdrop-blur-xl rounded-xl md:rounded-2xl border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 overflow-hidden">
+                          <div key={i} className="group relative aspect-square bg-white/5 dark:bg-white/10 backdrop-blur-xl rounded-xl md:rounded-2xl border border-[var(--accent)]/10 dark:border-[var(--accent)]/30 overflow-hidden">
                             <img src={tile} className="w-full h-full object-cover" alt={`Result ${i + 1}`} />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <button
@@ -2352,13 +2392,13 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                       <button
                                         onClick={() => setPreviewImage(tile)}
-                                        className="glow-box-sm text-[#1a2030] dark:text-white px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
+                                        className="glow-box-sm text-[#1a2030] dark:text-white px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[var(--accent)]/10 dark:border-[var(--accent)]/30 hover:bg-[var(--accent)]/20 hover:text-[var(--accent-hover)]"
                                       >
                                         {t.preview}
                                       </button>
                                       <button
                                         onClick={() => downloadTile(tile, i)}
-                                        className="glow-box-sm text-[#1a2030] dark:text-white px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30 hover:bg-[#4fc3f7]/20 hover:text-[#1a7aad]"
+                                        className="glow-box-sm text-[#1a2030] dark:text-white px-3 py-1.5 rounded-md text-xs font-bold w-24 border border-[var(--accent)]/10 dark:border-[var(--accent)]/30 hover:bg-[var(--accent)]/20 hover:text-[var(--accent-hover)]"
                                       >
                                         {t.download}
                                       </button>
@@ -2374,11 +2414,11 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                             <button
                               onClick={fetchNextPagePosters}
                               disabled={isLoadingPosters}
-                              className="glow-box-sm text-[#1a2030] dark:text-white px-6 py-2.5 rounded-xl text-sm border border-[#dde3ea] dark:border-white/20 hover:border-[#4fc3f7] transition-all flex items-center gap-2"
+                              className="glow-box-sm text-[#1a2030] dark:text-white px-6 py-2.5 rounded-xl text-sm border border-[#dde3ea] dark:border-white/20 hover:border-[var(--accent)] transition-all flex items-center gap-2"
                             >
                               {isLoadingPosters ? (
                                 <>
-                                  <Loader2 size={16} className="animate-spin text-[#1a7aad]" />
+                                  <Loader2 size={16} className="animate-spin text-[var(--accent-hover)]" />
                                   <span>Loading...</span>
                                 </>
                               ) : (
@@ -2426,25 +2466,34 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
           {/* How It Works */}
           <section id="how-it-works" className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-20">
             <h2 className="font-['Orbitron'] text-2xl md:text-3xl font-extrabold tracking-tighter text-center mb-10 md:mb-16">{t.howItWorksTitle}</h2>
-            <div className="blob-cards-container">
+            <div className="cards-stack-container how-stack">
               {[
-                { img: '/step1.png', text: t.howStep1, num: '01', color: 'blue' },
-                { img: '/step2.png', text: t.howStep2, num: '02', color: 'cyan' },
-                { img: '/step3.png', text: t.howStep3, num: '03', color: 'teal' }
-              ].map((step, i) => (
-                <React.Fragment key={i}>
+                { img: '/step1.png', text: t.howStep1, num: '01', desc: t.howStep1Desc, btn: t.howStep1Btn, class: 'card-one' },
+                { img: '/step2.png', text: t.howStep2, num: '02', desc: t.howStep2Desc, btn: t.howStep2Btn, class: 'card-two' },
+                { img: '/step3.png', text: t.howStep3, num: '03', desc: t.howStep3Desc, btn: t.howStep3Btn, class: 'card-three' }
+              ].map((step, i) => {
+                const diff = (i - activeHow + 3) % 3;
+                const activeClass = diff === 0 ? 'active-card' : diff === 1 ? 'right-card' : 'left-card';
+                return (
                   <div
-                    className={"blob-card gsap-how-card " + step.color}
+                    key={i}
+                    onClick={() => {
+                      if (activeHow === i) {
+                        setActiveHow((prev) => (prev + 1) % 3);
+                      } else {
+                        setActiveHow(i);
+                      }
+                    }}
+                    className={`stack-card ${step.class} ${activeClass}`}
                   >
-                    <div className="blob-card-bg">
-                      <img src={step.img} alt={step.text} style={{width:'100%',height:'120px',objectFit:'cover',borderRadius:'8px',marginBottom:'12px'}} />
-                      <span className="text-xs font-bold text-[#4fc3f7] bg-[#4fc3f7]/10 px-2.5 py-1 rounded-full mb-2 inline-block">{step.num}</span>
-                      <h3 className="font-['Orbitron'] text-sm font-bold text-center mt-2">{step.text}</h3>
+                    <div className="stack-card-bg-content">
+                      <img src={step.img} alt={step.text} style={{width:'100%',height:'150px',objectFit:'cover',borderRadius:'12px',marginBottom:'16px'}} />
+                      <span className="text-xs font-bold text-[var(--accent)] bg-[var(--accent)]/10 px-3 py-1.5 rounded-full mb-3 inline-block font-['Orbitron']">Step ${step.num}</span>
+                      <h3 className="font-['Orbitron'] text-sm font-bold text-center leading-snug px-2">{step.text}</h3>
                     </div>
                   </div>
-                  {i < 2 && <div className="connection-line" style={{left:'calc(100% - 0px)'}}></div>}
-                </React.Fragment>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -2475,53 +2524,125 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
               <h2 className="font-['Orbitron'] text-2xl md:text-3xl font-extrabold tracking-tighter mb-3">{t.compTitle}</h2>
               <p className="text-[#6b7a8d] dark:text-gray-300 text-sm md:text-base max-w-xl mx-auto">{t.compSub}</p>
             </div>
-            <div className="comparison-split-wrapper">
-              <div className="comparison-split-left gsap-comp-left">
-                <div className="comparison-split-header">
-                  <div className="comparison-split-icon comparison-split-icon-red">
-                    <Camera size={24} className="text-red-400" />
+
+            {/* Mobile View: Single Unified Card divided by VS line */}
+            <div className="md:hidden w-full max-w-sm mx-auto rounded-[24px] border border-white/15 dark:border-white/10 bg-white/10 dark:bg-white/5 backdrop-blur-xl overflow-hidden p-6 flex flex-col gap-6 relative shadow-xl">
+              {/* Traditional Half */}
+              <div className="flex flex-col text-left items-start">
+                <div className="flex items-center gap-3 mb-3 pb-2 border-b border-white/10 w-full">
+                  <div className="comparison-split-icon comparison-split-icon-red mb-0">
+                    <Camera size={20} className="text-red-400" />
                   </div>
-                  <h3 className="font-['Orbitron'] text-xl font-bold text-red-400">{t.compTraditionalTitle}</h3>
-                  <p className="text-red-400/70 text-sm font-medium mt-1">⏱ {t.compTraditionalTime}</p>
+                  <div>
+                    <h3 className="font-['Orbitron'] text-sm font-bold text-red-400 leading-none">{t.compTraditionalTitle}</h3>
+                    <p className="text-red-400/70 text-[9px] font-medium mt-1">⏱ {t.compTraditionalTime}</p>
+                  </div>
                 </div>
-                <div className="space-y-4 mt-6">
+                <div className="space-y-2 w-full">
                   {[t.compTraditional1, t.compTraditional2, t.compTraditional3].map((item, i) => (
                     <div key={i} className="comparison-item comparison-item-bad">
                       <div className="comparison-item-icon comparison-item-icon-bad">
-                        <X size={12} className="text-red-400" />
+                        <X size={10} className="text-red-400" />
                       </div>
-                      <span>{item}</span>
+                      <span className="text-[11px] text-[#1a2030] dark:text-gray-300">{item}</span>
                     </div>
                   ))}
                 </div>
-                <div className="comparison-frustration-bar"><div className="comparison-frustration-fill"></div></div>
-                <p className="text-red-400/60 text-xs mt-2 text-center">Workflow frustration: HIGH</p>
               </div>
-              <div className="comparison-divider">
-                <div className="comparison-divider-line"></div>
-                <div className="comparison-divider-vs">VS</div>
-                <div className="comparison-divider-line"></div>
-              </div>
-              <div className="comparison-split-right gsap-comp-right">
-                <div className="comparison-split-header">
-                  <div className="comparison-split-icon comparison-split-icon-blue">
-                    <Sparkles size={24} className="text-[#4fc3f7]" />
-                  </div>
-                  <h3 className="font-['Orbitron'] text-xl font-bold bg-gradient-to-br from-[#1a7aad] to-[#4fc3f7] bg-clip-text text-transparent">{t.compAiTitle}</h3>
-                  <p className="text-[#4fc3f7]/80 text-sm font-medium mt-1">✦ AI-Powered, instant results</p>
+
+              {/* VS Divider */}
+              <div className="relative w-full flex items-center justify-center py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#004643]/15 dark:border-[#01FFDB]/15"></div>
                 </div>
-                <div className="space-y-4 mt-6">
+                <span className="relative px-4 py-1 text-[10px] font-bold font-['Orbitron'] text-[var(--text)] bg-white/40 dark:bg-black/40 backdrop-blur-md border border-[var(--accent)]/30 rounded-full z-10 shadow-sm">VS</span>
+              </div>
+
+              {/* AI Half */}
+              <div className="flex flex-col text-left items-start">
+                <div className="flex items-center gap-3 mb-3 pb-2 border-b border-white/10 w-full">
+                  <div className="comparison-split-icon comparison-split-icon-blue mb-0">
+                    <Sparkles size={20} className="text-[var(--accent)]" />
+                  </div>
+                  <div>
+                    <h3 className="font-['Orbitron'] text-sm font-bold bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent leading-none">{t.compAiTitle}</h3>
+                    <p className="text-[var(--accent)]/80 text-[9px] font-medium mt-1">✦ AI-Powered, instant results</p>
+                  </div>
+                </div>
+                <div className="space-y-2 w-full">
                   {[t.compAi1, t.compAi2, t.compAi3].map((item, i) => (
                     <div key={i} className="comparison-item comparison-item-good">
                       <div className="comparison-item-icon comparison-item-icon-good">
-                        <Check size={12} className="text-[#22c55e]" />
+                        <Check size={10} className="text-[#22c55e]" />
                       </div>
-                      <span>{item}</span>
+                      <span className="text-[11px] text-[#1a2030] dark:text-gray-300">{item}</span>
                     </div>
                   ))}
                 </div>
-                <div className="comparison-success-bar"><div className="comparison-success-fill"></div></div>
-                <p className="text-[#4fc3f7]/60 text-xs mt-2 text-center">Workflow efficiency: INSTANT</p>
+              </div>
+            </div>
+
+            {/* Desktop View: Wide side-by-side cards with glow border on Nidu AI card */}
+            <div className="hidden md:flex flex-row gap-6 justify-center items-stretch w-full max-w-3xl mx-auto">
+              {/* Traditional Card */}
+              <div className="flex-1 max-w-[340px] h-[275px] rounded-[24px] border border-white/10 dark:border-white/10 bg-white/10 dark:bg-white/5 backdrop-blur-xl p-5 flex flex-col justify-between text-left items-start transition-all duration-300 hover:scale-[1.02] shadow-xl">
+                <div className="w-full">
+                  <div className="flex items-center gap-3 mb-3 border-b border-white/10 w-full pb-2.5">
+                    <div className="comparison-split-icon comparison-split-icon-red mb-0">
+                      <Camera size={22} className="text-red-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-['Orbitron'] text-base font-bold text-red-400 leading-none">{t.compTraditionalTitle}</h3>
+                      <p className="text-red-400/70 text-[10px] font-medium mt-1.5">⏱ {t.compTraditionalTime}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 w-full">
+                    {[t.compTraditional1, t.compTraditional2, t.compTraditional3].map((item, i) => (
+                      <div key={i} className="comparison-item comparison-item-bad !py-1">
+                        <div className="comparison-item-icon comparison-item-icon-bad">
+                          <X size={12} className="text-red-400" />
+                        </div>
+                        <span className="text-xs text-[#1a2030] dark:text-gray-300">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="w-full mt-auto">
+                  <div className="comparison-frustration-bar !mt-2"><div className="comparison-frustration-fill"></div></div>
+                  <p className="text-red-400/60 text-[10px] mt-1 text-center">Workflow frustration: HIGH</p>
+                </div>
+              </div>
+
+              {/* Nidu AI Card with Glowing Border */}
+              <div 
+                className="flex-1 max-w-[340px] h-[275px] rounded-[24px] border border-white/15 backdrop-blur-xl p-5 flex flex-col justify-between text-left items-start nidu-glow-card transition-all duration-300 hover:scale-[1.02] shadow-xl"
+                style={{ background: theme === 'light' ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(0, 70, 67, 0.15) 100%)' : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(1, 255, 219, 0.18) 100%)' }}
+              >
+                <div className="w-full">
+                  <div className="flex items-center gap-3 mb-3 border-b border-white/10 w-full pb-2.5">
+                    <div className="comparison-split-icon comparison-split-icon-blue mb-0">
+                      <Sparkles size={20} className="text-[var(--accent)]" />
+                    </div>
+                    <div>
+                      <h3 className="font-['Orbitron'] text-base font-bold bg-gradient-to-br from-[var(--accent-hover)] to-[var(--accent)] bg-clip-text text-transparent leading-none">{t.compAiTitle}</h3>
+                      <p className="text-[var(--accent)]/80 text-[10px] font-medium mt-1.5">✦ AI-Powered, instant results</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 w-full">
+                    {[t.compAi1, t.compAi2, t.compAi3].map((item, i) => (
+                      <div key={i} className="comparison-item comparison-item-good !py-1">
+                        <div className="comparison-item-icon comparison-item-icon-good">
+                          <Check size={12} className="text-[#22c55e]" />
+                        </div>
+                        <span className="text-xs text-[#1a2030] dark:text-gray-300">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="w-full mt-auto">
+                  <div className="comparison-success-bar !mt-2"><div className="comparison-success-fill"></div></div>
+                  <p className="text-[var(--accent)]/60 text-[10px] mt-1 text-center">Workflow efficiency: INSTANT</p>
+                </div>
               </div>
             </div>
           </section>
@@ -2530,37 +2651,37 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
           <section id="pricing" className="pricing-section relative z-10 py-16 md:py-24 mt-8">
             <div className="relative z-10 w-full max-w-5xl mx-auto px-4 md:px-6">
               <div className="text-center mb-12 md:mb-16">
-                <h2 className="font-['Orbitron'] text-2xl md:text-3xl font-extrabold tracking-tighter text-white mb-3">{t.pricingTitle}</h2>
-                <p className="text-white/60 text-sm md:text-base">{t.pricingDesc}</p>
+                <h2 className="font-['Orbitron'] text-2xl md:text-3xl font-extrabold tracking-tighter pricing-title-gradient mb-3">{t.pricingTitle}</h2>
+                <p className="text-[var(--text)]/60 text-sm md:text-base">{t.pricingDesc}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                  { name: 'Basic', price: '75,000', credits: 50, icon: Sparkles, iconClass: 'text-[#4fc3f7]/70', blobColor: 'rgba(79,195,247,0.3)' },
-                  { name: 'Standard', price: '150,000', credits: 150, icon: Zap, iconClass: 'text-yellow-400 animate-pulse', popular: true, saving: 'Save 33%', originalPrice: '225,000', blobColor: 'rgba(79,195,247,0.6)' },
+                  { name: 'Basic', price: '75,000', credits: 50, icon: Sparkles, iconClass: 'text-[var(--accent)]/70', blobColor: 'rgba(var(--accent-rgb),0.3)' },
+                  { name: 'Standard', price: '150,000', credits: 150, icon: Zap, iconClass: 'text-yellow-400 animate-pulse', popular: true, saving: 'Save 33%', originalPrice: '225,000', blobColor: 'rgba(var(--accent-rgb),0.6)' },
                   { name: 'Premium', price: '250,000', credits: 300, icon: ShieldCheck, iconClass: 'text-green-400', saving: 'Save 44%', originalPrice: '450,000', blobColor: 'rgba(34,197,94,0.4)' }
                 ].map((plan, i) => (
                   <div key={i} className={"pricing-card-animated flex flex-col relative overflow-visible" + (plan.popular ? " popular-animated" : "")}>
-                    {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#1a7aad] to-[#4fc3f7] text-[#0a0d12] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(79,195,247,0.5)] z-20">{t.mostPopular}</div>}
+                    {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[var(--accent-hover)] to-[var(--accent)] text-white dark:text-[#020202] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(var(--accent-rgb),0.5)] z-20">{t.mostPopular}</div>}
                     <div className="pricing-card-border-wrap relative overflow-hidden w-full h-full flex flex-col flex-1">
                       <div className="pricing-blob" style={{ background: plan.blobColor }}></div>
                       <div className="pricing-inner">
                         <div className="mb-4">
                           <plan.icon size={32} className={plan.iconClass} />
                         </div>
-                        <h3 className="font-['Orbitron'] text-2xl font-bold text-white mb-1">{plan.name}</h3>
+                        <h3 className="font-['Orbitron'] text-2xl font-bold text-[var(--text)] mb-1">{plan.name}</h3>
                         <div className="flex items-center flex-wrap gap-2 mb-6 relative">
-                          {plan.originalPrice && <span className="text-sm font-bold text-white/30 line-through">{plan.originalPrice}</span>}
+                          {plan.originalPrice && <span className="text-sm font-bold text-[var(--text)]/30 line-through">{plan.originalPrice}</span>}
                           <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold text-[#4fc3f7] drop-shadow-[0_0_8px_rgba(79,195,247,0.6)]">{plan.price}</span>
-                            <span className="text-sm text-white/50">UZS</span>
+                            <span className="text-2xl font-bold text-[var(--accent)] drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.6)]">{plan.price}</span>
+                            <span className="text-sm text-[var(--text)]/50">UZS</span>
                           </div>
-                          {plan.saving && <span className="absolute -top-6 right-0 text-[10px] font-bold text-[#1a7aad] bg-[#4fc3f7] px-2 py-1 rounded-md">{plan.saving}</span>}
+                          {plan.saving && <span className="absolute -top-6 right-0 text-[10px] font-bold text-white dark:text-[#020202] bg-[var(--accent)] px-2 py-1 rounded-md">{plan.saving}</span>}
                         </div>
                         <div className="space-y-4 mb-6 flex-1">
-                          <div className="flex items-center gap-3 text-sm"><CheckCircle2 size={14} className="text-[#4fc3f7]" /><span className="text-white font-bold">{plan.credits} {t.credits}</span></div>
-                          <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>AI Poster Generation</span></div>
-                          <div className="flex items-center gap-3 text-sm text-white/60"><CheckCircle2 size={14} /><span>Background Removal</span></div>
-                          <div className="text-xs text-[#4fc3f7] font-semibold border-t border-white/10 pt-3 mt-1 pl-1">
+                          <div className="flex items-center gap-3 text-sm"><CheckCircle2 size={14} className="text-[var(--accent)]" /><span className="text-[var(--text)] font-bold">{plan.credits} {t.credits}</span></div>
+                          <div className="flex items-center gap-3 text-sm text-[var(--text)]/60"><CheckCircle2 size={14} /><span>AI Poster Generation</span></div>
+                          <div className="flex items-center gap-3 text-sm text-[var(--text)]/60"><CheckCircle2 size={14} /><span>Background Removal</span></div>
+                          <div className="text-xs text-[var(--accent)] font-semibold border-t border-white/10 pt-3 mt-1 pl-1">
                             <span>
                               {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
                             </span>
@@ -2577,13 +2698,13 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                   </div>
                 ))}
               </div>
-              <p className="text-center mt-8 text-xs text-white/40">{t.manualPayment}</p>
+              <p className="text-center mt-8 text-xs text-[var(--text)]/40">{t.manualPayment}</p>
               <motion.div initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} className="text-center mt-12 md:mt-16">
-                <div className="credits-pulse inline-flex items-center gap-4 glow-box rounded-xl px-6 py-3 md:px-8 md:py-4 !bg-white/10 !border-white/15 !backdrop-blur-xl">
-                  <Sparkles className="text-[#4fc3f7] flex-shrink-0" size={24} />
+                <div className="credits-pulse inline-flex items-center gap-4 glow-box rounded-xl px-6 py-3 md:px-8 md:py-4 !bg-[var(--glow-bg-sm)] !border-[var(--glow-border-sm)] !backdrop-blur-xl">
+                  <Sparkles className="text-[var(--accent)] flex-shrink-0" size={24} />
                   <div className="text-left">
-                    <h3 className="font-['Orbitron'] text-sm md:text-base font-bold text-white mb-0.5">{t.freeCreditsTitle}</h3>
-                    <p className="text-white/60 text-[10px] md:text-xs m-0">{t.freeCreditsDesc}</p>
+                    <h3 className="font-['Orbitron'] text-sm md:text-base font-bold text-[var(--text)] mb-0.5">{t.freeCreditsTitle}</h3>
+                    <p className="text-[var(--text)]/60 text-[10px] md:text-xs m-0">{t.freeCreditsDesc}</p>
                   </div>
                 </div>
               </motion.div>
@@ -2599,10 +2720,10 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 viewport={{ once: true }}
                 className="max-w-2xl mx-auto space-y-6 py-8"
               >
-                <h2 className="font-['Orbitron'] text-2xl md:text-4xl font-extrabold tracking-tighter text-white">
+                <h2 className="font-['Orbitron'] text-2xl md:text-4xl font-extrabold tracking-tighter text-[var(--text)]">
                   {t.ctaTitle}
                 </h2>
-                <p className="text-white/70 text-sm md:text-base">
+                <p className="text-[var(--text)]/70 text-sm md:text-base">
                   {t.ctaSub}
                 </p>
                 <div className="flex justify-center mt-6">
@@ -2695,7 +2816,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     <button
                       key={lang}
                       onClick={() => setAppLanguage(lang)}
-                      className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${appLanguage === lang ? 'text-[#4fc3f7]' : 'text-white/40 hover:text-white/70'}`}
+                      className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${appLanguage === lang ? 'text-[var(--accent)]' : 'text-white/40 hover:text-white/70'}`}
                     >
                       {lang === 'English' ? 'EN' : lang === 'Russian' ? 'RU' : 'UZ'}
                     </button>
@@ -2740,20 +2861,20 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#6b7a8d] uppercase">{t.styleName}</label>
-                    <input name="name" defaultValue={editingPrompt?.name} className="w-full glow-box-sm rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4fc3f7]" required />
+                    <input name="name" defaultValue={editingPrompt?.name} className="w-full glow-box-sm rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--accent)]" required />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#6b7a8d] uppercase">{t.icon}</label>
-                    <input name="icon" defaultValue={editingPrompt?.icon || '✦'} className="w-full glow-box-sm rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4fc3f7]" required />
+                    <input name="icon" defaultValue={editingPrompt?.icon || '✦'} className="w-full glow-box-sm rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--accent)]" required />
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b7a8d] uppercase">Reference Image</label>
                   <div className="flex items-center gap-4">
                     {promptImageFile ? (
-                      <img src={URL.createObjectURL(promptImageFile)} alt="preview" className="w-12 h-12 rounded-lg object-cover border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30" />
+                      <img src={URL.createObjectURL(promptImageFile)} alt="preview" className="w-12 h-12 rounded-lg object-cover border border-[var(--accent)]/10 dark:border-[var(--accent)]/30" />
                     ) : editingPrompt?.imageUrl ? (
-                      <img src={editingPrompt.imageUrl} alt="preview" className="w-12 h-12 rounded-lg object-cover border border-[#4fc3f7]/10 dark:border-[#4fc3f7]/30" />
+                      <img src={editingPrompt.imageUrl} alt="preview" className="w-12 h-12 rounded-lg object-cover border border-[var(--accent)]/10 dark:border-[var(--accent)]/30" />
                     ) : (
                       <div className="w-12 h-12 glow-box-sm rounded-lg flex items-center justify-center border border-[#dde3ea] dark:border-white/20/40">
                         <Camera size={16} className="text-[#6b7a8d]" />
@@ -2763,17 +2884,17 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                       type="file" 
                       accept="image/*"
                       onChange={(e) => setPromptImageFile(e.target.files?.[0] || null)}
-                      className="text-sm text-[#6b7a8d] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:glow-box-sm file:text-[#1a7aad] hover:file:bg-[#1a1d26] cursor-pointer"
+                      className="text-sm text-[#6b7a8d] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:glow-box-sm file:text-[var(--accent-hover)] hover:file:bg-[#1a1d26] cursor-pointer"
                     />
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b7a8d] uppercase">{t.description}</label>
-                  <input name="description" defaultValue={editingPrompt?.description} className="w-full glow-box-sm rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#4fc3f7]" />
+                  <input name="description" defaultValue={editingPrompt?.description} className="w-full glow-box-sm rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--accent)]" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-[#6b7a8d] uppercase">{t.promptText}</label>
-                  <textarea name="promptText" defaultValue={editingPrompt?.promptText} className="w-full glow-box-sm rounded-xl px-4 py-3 text-xs font-mono min-h-[200px] focus:outline-none focus:border-[#4fc3f7] leading-relaxed" required />
+                  <textarea name="promptText" defaultValue={editingPrompt?.promptText} className="w-full glow-box-sm rounded-xl px-4 py-3 text-xs font-mono min-h-[200px] focus:outline-none focus:border-[var(--accent)] leading-relaxed" required />
                 </div>
                 <div className="flex items-center gap-2 py-1">
                   <input
@@ -2781,7 +2902,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                     id="isSoloCheckbox"
                     name="isSolo"
                     defaultChecked={editingPrompt ? !!editingPrompt.isSolo : adminTab === 'soloPrompts'}
-                    className="w-4 h-4 rounded text-[#4fc3f7] focus:ring-[#4fc3f7] bg-white/5 dark:bg-white/10 border-white/20"
+                    className="w-4 h-4 rounded text-[var(--accent)] focus:ring-[var(--accent)] bg-white/5 dark:bg-white/10 border-white/20"
                   />
                   <label htmlFor="isSoloCheckbox" className="text-xs font-bold text-[#6b7a8d] uppercase cursor-pointer">
                     Is Solo Style (Costs 5 credits, single output)
@@ -2789,7 +2910,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button type="button" onClick={() => setIsPromptModalOpen(false)} className="flex-1 py-4 text-sm font-bold text-[#6b7a8d] hover:text-[#0d1520]">{t.cancel}</button>
-                  <button type="submit" disabled={isUploadingPrompt} className="flex-1 btn-glossy text-[#1a7aad] py-4 rounded-2xl font-bold text-sm shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+                  <button type="submit" disabled={isUploadingPrompt} className="flex-1 btn-glossy text-[var(--accent-hover)] py-4 rounded-2xl font-bold text-sm shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
                     {isUploadingPrompt ? <Loader2 size={16} className="animate-spin" /> : t.saveTemplate}
                   </button>
                 </div>
@@ -2859,17 +2980,17 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { name: 'Basic', price: '75,000', credits: 50, color: '#1a7aad', icon: Sparkles, iconClass: 'text-[#4fc3f7]/70' },
-                  { name: 'Standard', price: '150,000', credits: 150, color: '#1a7aad', icon: Zap, iconClass: 'text-yellow-400 animate-pulse', popular: true },
+                  { name: 'Basic', price: '75,000', credits: 50, color: 'var(--accent-hover)', icon: Sparkles, iconClass: 'text-[var(--accent)]/70' },
+                  { name: 'Standard', price: '150,000', credits: 150, color: 'var(--accent-hover)', icon: Zap, iconClass: 'text-yellow-400 animate-pulse', popular: true },
                   { name: 'Premium', price: '250,000', credits: 300, color: '#d95050', icon: ShieldCheck, iconClass: 'text-green-400' }
                 ].map((plan, i) => (
                   <div
                     key={i}
-                    className={`relative glow-box-sm border rounded-[32px] p-6 flex flex-col transition-all hover:scale-[1.02] ${plan.popular ? 'border-[#4fc3f7]/50 shadow-[0_0_40px_rgba(79,195,247,0.15)]' : 'border-[#dde3ea] dark:border-white/20'
+                    className={`relative glow-box-sm border rounded-[32px] p-6 flex flex-col transition-all hover:scale-[1.02] ${plan.popular ? 'border-[var(--accent)]/50 shadow-[0_0_40px_rgba(var(--accent-rgb),0.15)]' : 'border-[#dde3ea] dark:border-white/20'
                       }`}
                   >
                     {plan.popular && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#4fc3f7] text-[#0a0d12] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(79,195,247,0.3)]">
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[var(--accent)] text-[#0a0d12] text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)]">
                         {t.mostPopular}
                       </div>
                     )}
@@ -2884,24 +3005,24 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
 
                     <div className="space-y-4 mb-6 flex-1">
                       <div className="flex items-center gap-3 text-sm">
-                        <div className="w-5 h-5 rounded-full bg-[#4fc3f7]/10 flex items-center justify-center">
-                          <CheckCircle2 size={12} className="text-[#1a7aad]" />
+                        <div className="w-5 h-5 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+                          <CheckCircle2 size={12} className="text-[var(--accent-hover)]" />
                         </div>
                         <span className="font-bold text-[#1a2030] dark:text-white">{plan.credits} {t.credits}</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-[#6b7a8d]">
-                        <div className="w-5 h-5 rounded-full bg-[#4fc3f7]/10 flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                           <CheckCircle2 size={12} />
                         </div>
                         <span>AI Poster Generation</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-[#6b7a8d]">
-                        <div className="w-5 h-5 rounded-full bg-[#4fc3f7]/10 flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
                           <CheckCircle2 size={12} />
                         </div>
                         <span>Background Removal</span>
                       </div>
-                      <div className="text-xs text-[#1a7aad] dark:text-[#4fc3f7] font-semibold border-t border-[#dde3ea] dark:border-white/10 pt-3 mt-1 pl-1">
+                      <div className="text-xs text-[var(--accent-hover)] dark:text-[var(--accent)] font-semibold border-t border-[#dde3ea] dark:border-white/10 pt-3 mt-1 pl-1">
                         <span>
                           {plan.credits === 50 ? t.planBasicImages : plan.credits === 150 ? t.planStandardImages : t.planPremiumImages}
                         </span>
@@ -2954,7 +3075,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 <X size={24} />
               </button>
 
-              <h2 className="font-['Orbitron'] text-xl md:text-2xl font-bold mb-6 text-[#1a7aad] dark:text-[#4fc3f7]">{t.footerPrivacy}</h2>
+              <h2 className="font-['Orbitron'] text-xl md:text-2xl font-bold mb-6 text-[var(--accent-hover)] dark:text-[var(--accent)]">{t.footerPrivacy}</h2>
               
               <div className="space-y-4 text-xs md:text-sm leading-relaxed overflow-y-auto max-h-[60vh] pr-2 text-[#1a2030] dark:text-white/80">
                 {appLanguage === 'English' ? (
@@ -3030,7 +3151,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 <X size={24} />
               </button>
 
-              <h2 className="font-['Orbitron'] text-xl md:text-2xl font-bold mb-6 text-[#1a7aad] dark:text-[#4fc3f7]">{t.footerTerms}</h2>
+              <h2 className="font-['Orbitron'] text-xl md:text-2xl font-bold mb-6 text-[var(--accent-hover)] dark:text-[var(--accent)]">{t.footerTerms}</h2>
               
               <div className="space-y-4 text-xs md:text-sm leading-relaxed overflow-y-auto max-h-[60vh] pr-2 text-[#1a2030] dark:text-white/80">
                 {appLanguage === 'English' ? (
@@ -3102,7 +3223,7 @@ FINAL OUTPUT: One single image with 4 clean sections. Highly detailed, ultra sha
                 </button>
                 <button
                   onClick={() => { localStorage.setItem('cookieConsent', 'accepted'); setShowCookieBanner(false); }}
-                  className="px-5 py-2 bg-[#4fc3f7] text-[#0a0d12] rounded-lg text-xs font-bold hover:bg-[#81d4fa] transition-colors"
+                  className="px-5 py-2 bg-[var(--accent)] text-[#0a0d12] rounded-lg text-xs font-bold hover:bg-[var(--accent-light)] transition-colors"
                 >
                   {t.cookieAccept}
                 </button>

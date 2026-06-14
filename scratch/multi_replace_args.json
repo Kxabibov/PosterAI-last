@@ -1,6 +1,0 @@
-{
-  "Description": "\"Implementing all the requested visual design upgrades: typed hero text cycling, space-star CTA button with aqua glow, 3D tilt on example cards, visual split comparison, and animated pricing cards.\"",
-  "Instruction": "\"1. Add TypewriterHero component for animated cycling text. 2. Update Start Creating button to use space-star structure with aqua glow. 3. Update examples cards to have 3D tilt effect. 4. Update comparison section to visual split comparison. 5. Update pric\n<truncated 41 bytes>",
-  "ReplacementChunks": "[{\"AllowMultiple\":false,\"EndLine\":1,\"ReplacementContent\":\"import React, { useState, useEffect, useRef, useCallback } from 'react';\",\"StartLine\":1,\"TargetContent\":\"import React, { useState, useEffect, useRef } from 'react';\"},{\"AllowMultiple\":false,\"EndLine\n<truncated 23681 bytes>",
-  "TargetFile": "\"c:\\\\Users\\\\М313\\\\Desktop\\\\poster\\\\Poster-Maker-main\\\\src\\\\App.tsx\""
-}
